@@ -3400,6 +3400,11 @@ function library:CreateWindow(name, size, hidebutton)
 					-- Применяем настройки
 					for flag, value in pairs(configData) do
 						if library.flags[flag] ~= nil then
+							-- Пропускаем служебные поля конфига
+							if flag == "Configs" or flag == "ConfigName" then
+								continue
+							end
+
 							-- Обрабатываем разные типы данных
 							if type(value) == "table" then
 								if #value == 3 then -- Color3
@@ -3408,12 +3413,16 @@ function library:CreateWindow(name, size, hidebutton)
 									library.flags[flag] = value
 								end
 							elseif type(value) == "string" then
-								-- Пробуем загрузить как KeyCode
-								local keyCode = Enum.KeyCode[value]
-								if keyCode then
-									library.flags[flag] = keyCode
+								-- Специальная обработка для KeyCode
+								if flag:lower():find("key") or flag:lower():find("bind") then
+									local keyCode = Enum.KeyCode[value]
+									if keyCode then
+										library.flags[flag] = keyCode
+									else
+										library.flags[flag] = value -- Оставляем строку если KeyCode не найден
+									end
 								else
-									-- Если это не KeyCode, оставляем как строку
+									-- Для обычных строк
 									library.flags[flag] = value
 								end
 							else -- Другие значения
