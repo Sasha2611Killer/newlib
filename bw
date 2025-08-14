@@ -3388,13 +3388,13 @@ function library:CreateWindow(name, size, hidebutton)
 								-- Обработка KeyCode (биндов)
 							elseif (flag:lower():find("key") or flag:lower():find("bind")) then
 								if value == "None" or value == "" then
-									targetValue = Enum.KeyCode.Unknown -- или nil, если ваша библиотека поддерживает
+									targetValue = "None" -- или nil, если ваша библиотека поддерживает
 								else
 									-- Проверяем, существует ли такой KeyCode
 									local success, keyCode = pcall(function()
 										return Enum.KeyCode[value]
 									end)
-									targetValue = success and keyCode or Enum.KeyCode.Unknown
+									targetValue = success and keyCode or "None"
 								end
 							end
 
