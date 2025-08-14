@@ -3369,38 +3369,43 @@ function library:CreateWindow(name, size, hidebutton)
 					-- Применяем настройки из конфига
 					for flag, value in pairs(configData) do
 						if flag ~= "Configs" and flag ~= "ConfigName" and library.flags[flag] ~= nil then
-							-- Обработка разных типов данных
 							local targetValue = value
 
 							-- Обработка Color3
 							if type(value) == "table" and #value == 3 then
 								targetValue = Color3.new(value[1], value[2], value[3])
-								-- Обработка числовых значений (для слайдеров)
+
+								-- Обработка чисел
 							elseif tonumber(value) then
 								targetValue = tonumber(value)
+
 								-- Обработка булевых значений
 							elseif value == "true" then
 								targetValue = true
 							elseif value == "false" then
 								targetValue = false
-								-- Обработка KeyCode
+
+								-- Обработка KeyCode (биндов)
 							elseif (flag:lower():find("key") or flag:lower():find("bind")) then
-								if value == "None" then
-									targetValue = nil -- или Enum.KeyCode.Unknown в зависимости от вашей библиотеки
-								elseif Enum.KeyCode[value] then
-									targetValue = Enum.KeyCode[value]
+								if value == "None" or value == "" then
+									targetValue = Enum.KeyCode.Unknown -- или nil, если ваша библиотека поддерживает
+								else
+									-- Проверяем, существует ли такой KeyCode
+									local success, keyCode = pcall(function()
+										return Enum.KeyCode[value]
+									end)
+									targetValue = success and keyCode or Enum.KeyCode.Unknown
 								end
 							end
 
 							-- Устанавливаем значение флага
 							library.flags[flag] = targetValue
 
-							-- Обновляем элементы UI
+							-- Обновляем UI элементы
 							for _, item in pairs(library.items) do
 								if item.flag == flag and item.Set then
 									pcall(function()
-										-- Для слайдеров убедимся, что передаем число
-										if item.SlideBar then -- Проверяем, что это слайдер
+										if item.SlideBar then -- Если это слайдер
 											item:Set(tonumber(targetValue) or targetValue)
 										else
 											item:Set(targetValue)
