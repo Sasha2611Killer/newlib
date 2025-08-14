@@ -3317,8 +3317,12 @@ function library:CreateWindow(name, size, hidebutton)
 						if value ~= nil then
 							if typeof(value) == "Color3" then
 								configData[flag] = {value.R, value.G, value.B}
-							elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
-								configData[flag] = value.Name
+							elseif typeof(value) == "EnumItem" then
+								if value.EnumType == Enum.KeyCode then
+									configData[flag] = value.Name
+								else
+									configData[flag] = tostring(value)
+								end
 							elseif typeof(value) == "table" then
 								configData[flag] = value
 							else
@@ -3354,8 +3358,12 @@ function library:CreateWindow(name, size, hidebutton)
 						if value ~= nil then
 							if typeof(value) == "Color3" then
 								configData[flag] = {value.R, value.G, value.B}
-							elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
-								configData[flag] = value.Name
+							elseif typeof(value) == "EnumItem" then
+								if value.EnumType == Enum.KeyCode then
+									configData[flag] = value.Name
+								else
+									configData[flag] = tostring(value)
+								end
 							elseif typeof(value) == "table" then
 								configData[flag] = value
 							else
@@ -3399,8 +3407,15 @@ function library:CreateWindow(name, size, hidebutton)
 								else -- Обычная таблица
 									library.flags[flag] = value
 								end
-							elseif type(value) == "string" and Enum.KeyCode[value] then -- KeyCode
-								library.flags[flag] = Enum.KeyCode[value]
+							elseif type(value) == "string" then
+								-- Пробуем загрузить как KeyCode
+								local keyCode = Enum.KeyCode[value]
+								if keyCode then
+									library.flags[flag] = keyCode
+								else
+									-- Если это не KeyCode, оставляем как строку
+									library.flags[flag] = value
+								end
 							else -- Другие значения
 								library.flags[flag] = value
 							end
