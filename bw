@@ -3384,8 +3384,12 @@ function library:CreateWindow(name, size, hidebutton)
 							elseif value == "false" then
 								targetValue = false
 								-- Обработка KeyCode
-							elseif (flag:lower():find("key") or flag:lower():find("bind")) and Enum.KeyCode[value] then
-								targetValue = Enum.KeyCode[value]
+							elseif (flag:lower():find("key") or flag:lower():find("bind")) then
+								if value == "None" then
+									targetValue = nil -- или Enum.KeyCode.Unknown в зависимости от вашей библиотеки
+								elseif Enum.KeyCode[value] then
+									targetValue = Enum.KeyCode[value]
+								end
 							end
 
 							-- Устанавливаем значение флага
