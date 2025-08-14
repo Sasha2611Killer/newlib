@@ -3366,46 +3366,41 @@ function library:CreateWindow(name, size, hidebutton)
 						return
 					end
 
-					-- Сначала выключаем все Toggle элементы
-					for _, item in pairs(library.items) do
-						if item.flag and item.Set and item.CheckedFrame then -- Проверяем что это Toggle
-							item:Set(false) -- Выключаем
-						end
-					end
-
-					-- Затем применяем настройки из конфига
+					-- Применяем настройки из конфига
 					for flag, value in pairs(configData) do
 						if flag ~= "Configs" and flag ~= "ConfigName" and library.flags[flag] ~= nil then
 							-- Обработка разных типов данных
-							if type(value) == "table" then
-								if #value == 3 then -- Color3
-									library.flags[flag] = Color3.new(value[1], value[2], value[3])
-								else -- Обычная таблица
-									library.flags[flag] = value
-								end
-							elseif type(value) == "string" then
-								-- Для Toggle учитываем строковые "true"/"false"
-								if value:lower() == "true" then
-									library.flags[flag] = true
-								elseif value:lower() == "false" then
-									library.flags[flag] = false
-									-- Обработка KeyCode
-								elseif (flag:lower():find("key") or flag:lower():find("bind")) and Enum.KeyCode[value] then
-									library.flags[flag] = Enum.KeyCode[value]
-								else
-									library.flags[flag] = value
-								end
-							elseif type(value) == "boolean" then -- Прямое boolean значение
-								library.flags[flag] = value
-							else -- Другие значения
-								library.flags[flag] = value
+							local targetValue = value
+
+							-- Обработка Color3
+							if type(value) == "table" and #value == 3 then
+								targetValue = Color3.new(value[1], value[2], value[3])
+								-- Обработка числовых значений (для слайдеров)
+							elseif tonumber(value) then
+								targetValue = tonumber(value)
+								-- Обработка булевых значений
+							elseif value == "true" then
+								targetValue = true
+							elseif value == "false" then
+								targetValue = false
+								-- Обработка KeyCode
+							elseif (flag:lower():find("key") or flag:lower():find("bind")) and Enum.KeyCode[value] then
+								targetValue = Enum.KeyCode[value]
 							end
+
+							-- Устанавливаем значение флага
+							library.flags[flag] = targetValue
 
 							-- Обновляем элементы UI
 							for _, item in pairs(library.items) do
 								if item.flag == flag and item.Set then
 									pcall(function()
-										item:Set(library.flags[flag])
+										-- Для слайдеров убедимся, что передаем число
+										if item.SlideBar then -- Проверяем, что это слайдер
+											item:Set(tonumber(targetValue) or targetValue)
+										else
+											item:Set(targetValue)
+										end
 									end)
 								end
 							end
@@ -3417,10 +3412,11 @@ function library:CreateWindow(name, size, hidebutton)
 			configsystem.Save = configsystem.sector:AddButton("Save", function()
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
-					-- Подготавливаем данные
+					-- Подготавливаем данные для сохранения
 					local configData = {}
 					for flag, value in pairs(library.flags) do
-						if value ~= nil then
+						if flag ~= "Configs" and flag ~= "ConfigName" and value ~= nil then
+							-- Обработка разных типов данных
 							if typeof(value) == "Color3" then
 								configData[flag] = {value.R, value.G, value.B}
 							elseif typeof(value) == "EnumItem" then
@@ -3432,14 +3428,19 @@ function library:CreateWindow(name, size, hidebutton)
 							elseif typeof(value) == "table" then
 								configData[flag] = value
 							else
-								configData[flag] = tostring(value)
+								-- Для чисел сохраняем как есть, для остального - как строку
+								if type(value) == "number" then
+									configData[flag] = value
+								else
+									configData[flag] = tostring(value)
+								end
 							end
 						end
 					end
 
 					-- Сохраняем в файл
 					local success, err = pcall(function()
-						writefile(configsystem.configFolder .. "/" .. selected .. ".txt", http:JSONEncode(configData))
+						writefile(configsystem.configFolder .. "\\" .. selected .. ".txt", http:JSONEncode(configData))
 					end)
 
 					if not success then
