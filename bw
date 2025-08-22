@@ -1205,7 +1205,7 @@ function library:CreateWindow(name, size, hidebutton)
 							if not table.find(currentPlayers, playerName) then
 								dropdown:Remove(playerName)
 
-								-- Если удаленный игрок был выбран, убираем его из выбора
+								-- Если удаленный игрок был выбран, просто убираем его из выбора
 								if multichoice and type(currentSelection) == "table" then
 									local newSelection = {}
 									for _, selectedName in ipairs(currentSelection) do
@@ -1213,19 +1213,13 @@ function library:CreateWindow(name, size, hidebutton)
 											table.insert(newSelection, selectedName)
 										end
 									end
-									if #newSelection > 0 then
+									-- Устанавливаем новый выбор только если есть изменения
+									if #newSelection ~= #currentSelection then
 										dropdown:Set(newSelection)
-									else
-										-- Если не осталось выбранных, выбираем первого доступного
-										if #currentPlayers > 0 then
-											dropdown:Set({currentPlayers[1]})
-										end
 									end
 								elseif not multichoice and currentSelection == playerName then
-									-- Если одиночный выбор и выбранный игрок вышел
-									if #currentPlayers > 0 then
-										dropdown:Set(currentPlayers[1])
-									end
+									-- Если одиночный выбор и выбранный игрок вышел, НЕ выбираем автоматически другого
+									dropdown:Set("") -- Оставляем пустым вместо выбора другого игрока
 								end
 							end
 						end
@@ -3277,7 +3271,7 @@ function library:CreateWindow(name, size, hidebutton)
 						if not table.find(currentPlayers, playerName) then
 							dropdown:Remove(playerName)
 
-							-- Если удаленный игрок был выбран, убираем его из выбора
+							-- Если удаленный игрок был выбран, просто убираем его из выбора
 							if multichoice and type(currentSelection) == "table" then
 								local newSelection = {}
 								for _, selectedName in ipairs(currentSelection) do
@@ -3285,19 +3279,13 @@ function library:CreateWindow(name, size, hidebutton)
 										table.insert(newSelection, selectedName)
 									end
 								end
-								if #newSelection > 0 then
+								-- Устанавливаем новый выбор только если есть изменения
+								if #newSelection ~= #currentSelection then
 									dropdown:Set(newSelection)
-								else
-									-- Если не осталось выбранных, выбираем первого доступного
-									if #currentPlayers > 0 then
-										dropdown:Set({currentPlayers[1]})
-									end
 								end
 							elseif not multichoice and currentSelection == playerName then
-								-- Если одиночный выбор и выбранный игрок вышел
-								if #currentPlayers > 0 then
-									dropdown:Set(currentPlayers[1])
-								end
+								-- Если одиночный выбор и выбранный игрок вышел, НЕ выбираем автоматически другого
+								dropdown:Set("") -- или оставляем пустым
 							end
 						end
 					end
