@@ -1178,6 +1178,75 @@ function library:CreateWindow(name, size, hidebutton)
 
 					return dropdown
 				end
+				
+				function toggle:AddDropdownPlayers(default, multichoice, callback, flag)
+					local dropdown = {}
+
+					-- Функция для получения списка игроков
+					local function GetPlayerNames()
+						local playerNames = {}
+						for _, player in ipairs(players:GetPlayers()) do
+							table.insert(playerNames, player.Name)
+						end
+						return playerNames
+					end
+
+					-- Создаем дропдаун с текущим списком игроков
+					dropdown = self:AddDropdown(GetPlayerNames(), default, multichoice, callback, flag)
+
+					-- Функция для обновления списка игроков
+					local function UpdatePlayerList()
+						local currentPlayers = GetPlayerNames()
+						local currentSelection = dropdown:Get()
+
+						-- Удаляем игроков, которых больше нет
+						for i = #dropdown.items, 1, -1 do
+							local playerName = dropdown.items[i]
+							if not table.find(currentPlayers, playerName) then
+								dropdown:Remove(playerName)
+
+								-- Если удаленный игрок был выбран, убираем его из выбора
+								if multichoice and type(currentSelection) == "table" then
+									local newSelection = {}
+									for _, selectedName in ipairs(currentSelection) do
+										if selectedName ~= playerName then
+											table.insert(newSelection, selectedName)
+										end
+									end
+									if #newSelection > 0 then
+										dropdown:Set(newSelection)
+									else
+										-- Если не осталось выбранных, выбираем первого доступного
+										if #currentPlayers > 0 then
+											dropdown:Set({currentPlayers[1]})
+										end
+									end
+								elseif not multichoice and currentSelection == playerName then
+									-- Если одиночный выбор и выбранный игрок вышел
+									if #currentPlayers > 0 then
+										dropdown:Set(currentPlayers[1])
+									end
+								end
+							end
+						end
+
+						-- Добавляем новых игроков
+						for _, playerName in ipairs(currentPlayers) do
+							if not dropdown.ItemsFrame:FindFirstChild(playerName) then
+								dropdown:Add(playerName)
+							end
+						end
+					end
+
+					-- Обновляем при подключении/отключении игроков
+					players.PlayerAdded:Connect(UpdatePlayerList)
+					players.PlayerRemoving:Connect(UpdatePlayerList)
+
+					-- Инициализируем список
+					UpdatePlayerList()
+
+					return dropdown
+				end
 
 				function toggle:AddTextbox(default, callback, flag)
 					local textbox = {}
@@ -3178,6 +3247,75 @@ function library:CreateWindow(name, size, hidebutton)
 
 				sector:FixSize()
 				table.insert(library.items, dropdown)
+
+				return dropdown
+			end
+			
+			function sector:AddDropdownPlayers(text, default, multichoice, callback, flag)
+				local dropdown = {}
+
+				-- Функция для получения списка игроков
+				local function GetPlayerNames()
+					local playerNames = {}
+					for _, player in ipairs(players:GetPlayers()) do
+						table.insert(playerNames, player.Name)
+					end
+					return playerNames
+				end
+
+				-- Создаем дропдаун с текущим списком игроков
+				dropdown = self:AddDropdown(text, GetPlayerNames(), default, multichoice, callback, flag)
+
+				-- Функция для обновления списка игроков
+				local function UpdatePlayerList()
+					local currentPlayers = GetPlayerNames()
+					local currentSelection = dropdown:Get()
+
+					-- Удаляем игроков, которых больше нет
+					for i = #dropdown.items, 1, -1 do
+						local playerName = dropdown.items[i]
+						if not table.find(currentPlayers, playerName) then
+							dropdown:Remove(playerName)
+
+							-- Если удаленный игрок был выбран, убираем его из выбора
+							if multichoice and type(currentSelection) == "table" then
+								local newSelection = {}
+								for _, selectedName in ipairs(currentSelection) do
+									if selectedName ~= playerName then
+										table.insert(newSelection, selectedName)
+									end
+								end
+								if #newSelection > 0 then
+									dropdown:Set(newSelection)
+								else
+									-- Если не осталось выбранных, выбираем первого доступного
+									if #currentPlayers > 0 then
+										dropdown:Set({currentPlayers[1]})
+									end
+								end
+							elseif not multichoice and currentSelection == playerName then
+								-- Если одиночный выбор и выбранный игрок вышел
+								if #currentPlayers > 0 then
+									dropdown:Set(currentPlayers[1])
+								end
+							end
+						end
+					end
+
+					-- Добавляем новых игроков
+					for _, playerName in ipairs(currentPlayers) do
+						if not dropdown.ItemsFrame:FindFirstChild(playerName) then
+							dropdown:Add(playerName)
+						end
+					end
+				end
+
+				-- Обновляем при подключении/отключении игроков
+				players.PlayerAdded:Connect(UpdatePlayerList)
+				players.PlayerRemoving:Connect(UpdatePlayerList)
+
+				-- Инициализируем список
+				task.spawn(UpdatePlayerList)
 
 				return dropdown
 			end
