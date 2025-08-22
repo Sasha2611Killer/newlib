@@ -273,27 +273,9 @@ function library:CreateWindow(name, size, hidebutton)
 		local tab = {}
 		tab.name = name or ""
 
-		local size = textservice:GetTextSize(tab.name, window.theme.fontsize, window.theme.font, Vector2.new(1000, 300)) -- Увеличил размер
+		local size = textservice:GetTextSize(tab.name, window.theme.fontsize, window.theme.font, Vector2.new(200, 300))
 
-		-- Создаем контейнер для табов с горизонтальным скроллом
-		if not window.TabListContainer then
-			window.TabListContainer = Instance.new("ScrollingFrame", window.TabList)
-			window.TabListContainer.Name = "TabListContainer"
-			window.TabListContainer.Size = UDim2.new(1, 0, 1, 0)
-			window.TabListContainer.Position = UDim2.new(0, 0, 0, 0)
-			window.TabListContainer.BackgroundTransparency = 1
-			window.TabListContainer.BorderSizePixel = 0
-			window.TabListContainer.ScrollBarThickness = 3
-			window.TabListContainer.ScrollingDirection = Enum.ScrollingDirection.X
-			window.TabListContainer.AutomaticCanvasSize = Enum.AutomaticSize.X -- Автоматический размер
-
-			window.TabListLayout = Instance.new("UIListLayout", window.TabListContainer)
-			window.TabListLayout.FillDirection = Enum.FillDirection.Horizontal
-			window.TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-			window.TabListLayout.Padding = UDim.new(0, 5) -- Отступ между табами
-		end
-
-		tab.TabButton = Instance.new("TextButton", window.TabListContainer) -- Помещаем в контейнер
+		tab.TabButton = Instance.new("TextButton", window.TabList)
 		tab.TabButton.TextColor3 = window.theme.tabstextcolor
 		tab.TabButton.Text = tab.name
 		tab.TabButton.AutoButtonColor = false
@@ -301,16 +283,14 @@ function library:CreateWindow(name, size, hidebutton)
 		tab.TabButton.TextYAlignment = Enum.TextYAlignment.Center
 		tab.TabButton.BackgroundTransparency = 1
 		tab.TabButton.BorderSizePixel = 0
-		tab.TabButton.Size = UDim2.fromOffset(size.X + 20, window.TabList.AbsoluteSize.Y - 1) -- Увеличил отступ
+		tab.TabButton.Size = UDim2.fromOffset(size.X + 15, window.TabList.AbsoluteSize.Y - 1)
 		tab.TabButton.Name = tab.name
 		tab.TabButton.TextSize = window.theme.fontsize
-		tab.TabButton.TextTruncate = Enum.TextTruncate.None -- Отключаем обрезку текста
-
 		updateevent.Event:Connect(function(theme)
-			local size = textservice:GetTextSize(tab.name, theme.fontsize, theme.font, Vector2.new(1000, 300))
+			local size = textservice:GetTextSize(tab.name, theme.fontsize, theme.font, Vector2.new(200, 300))
 			tab.TabButton.TextColor3 = tab.TabButton.Name == "SelectedTab" and theme.accentcolor or theme.tabstextcolor
 			tab.TabButton.Font = theme.font
-			tab.TabButton.Size = UDim2.fromOffset(size.X + 20, window.TabList.AbsoluteSize.Y - 1)
+			tab.TabButton.Size = UDim2.fromOffset(size.X + 15, window.TabList.AbsoluteSize.Y - 1)
 			tab.TabButton.TextSize = theme.fontsize
 		end)
 
@@ -359,47 +339,26 @@ function library:CreateWindow(name, size, hidebutton)
 			repeat task.wait() until not block
 
 			block = true
-			for i, v in ipairs(window.Tabs) do
-				if v and v ~= tab then
-					if v.TabButton then
-						v.TabButton.TextColor3 = Color3.fromRGB(230, 230, 230)
-						v.TabButton.Name = "Tab"
-					end
-					if v.Left then v.Left.Visible = false end
-					if v.Right then v.Right.Visible = false end
+			for i, v in (window.Tabs) do
+				if v ~= tab then
+					v.TabButton.TextColor3 = Color3.fromRGB(230, 230, 230)
+					v.TabButton.Name = "Tab"
+					v.Left.Visible = false
+					v.Right.Visible = false
 				end
 			end
 
-			if tab.TabButton then
-				tab.TabButton.TextColor3 = window.theme.accentcolor
-				tab.TabButton.Name = "SelectedTab"
-			end
-			if tab.Right then tab.Right.Visible = true end
-			if tab.Left then tab.Left.Visible = true end
-
-			if window.Line then
-				local currentSize = textservice:GetTextSize(tab.name, window.theme.fontsize, window.theme.font, Vector2.new(1000, 300))
-				window.Line:TweenSizeAndPosition(
-					UDim2.fromOffset(currentSize.X + 20, 1), 
-					UDim2.new(0, (tab.TabButton.AbsolutePosition.X - window.Frame.AbsolutePosition.X), 0, 0) + (window.BlackLine.Position - UDim2.fromOffset(0, 1)), 
-					Enum.EasingDirection.In, 
-					Enum.EasingStyle.Sine, 
-					0.15
-				)
-			end
+			tab.TabButton.TextColor3 = window.theme.accentcolor
+			tab.TabButton.Name = "SelectedTab"
+			tab.Right.Visible = true
+			tab.Left.Visible = true
+			window.Line:TweenSizeAndPosition(UDim2.fromOffset(size.X + 15, 1), UDim2.new(0, (tab.TabButton.AbsolutePosition.X - window.Frame.AbsolutePosition.X), 0, 0) + (window.BlackLine.Position - UDim2.fromOffset(0, 1)), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15)
 			task.wait(0.2)
 			block = false
 		end
 
-		if not window.Tabs then
-			window.Tabs = {}
-		end
-
 		if #window.Tabs == 0 then
-			spawn(function()
-				wait(0.1)
-				tab:SelectTab()
-			end)
+			tab:SelectTab()
 		end
 
 		tab.TabButton.MouseButton1Down:Connect(function()
@@ -408,8 +367,6 @@ function library:CreateWindow(name, size, hidebutton)
 
 		tab.SectorsLeft = {}
 		tab.SectorsRight = {}
-
-		table.insert(window.Tabs, tab)
 
 		function tab:CreateSector(name, side)
 			local sector = {}
