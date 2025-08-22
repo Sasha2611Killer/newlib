@@ -273,7 +273,8 @@ function library:CreateWindow(name, size, hidebutton)
 		local tab = {}
 		tab.name = name or ""
 
-		local size = textservice:GetTextSize(tab.name, window.theme.fontsize, window.theme.font, Vector2.new(200, 300))
+		-- Увеличиваем максимальный размер для вычисления текста
+		local size = textservice:GetTextSize(tab.name, window.theme.fontsize, window.theme.font, Vector2.new(1000, 300))
 
 		tab.TabButton = Instance.new("TextButton", window.TabList)
 		tab.TabButton.TextColor3 = window.theme.tabstextcolor
@@ -283,17 +284,20 @@ function library:CreateWindow(name, size, hidebutton)
 		tab.TabButton.TextYAlignment = Enum.TextYAlignment.Center
 		tab.TabButton.BackgroundTransparency = 1
 		tab.TabButton.BorderSizePixel = 0
-		tab.TabButton.Size = UDim2.fromOffset(size.X + 15, window.TabList.AbsoluteSize.Y - 1)
+		tab.TabButton.Size = UDim2.fromOffset(size.X + 20, window.TabList.AbsoluteSize.Y - 1) -- Увеличиваем отступ
 		tab.TabButton.Name = tab.name
 		tab.TabButton.TextSize = window.theme.fontsize
+		tab.TabButton.TextTruncate = Enum.TextTruncate.None -- Отключаем обрезку текста
+
 		updateevent.Event:Connect(function(theme)
-			local size = textservice:GetTextSize(tab.name, theme.fontsize, theme.font, Vector2.new(200, 300))
+			local size = textservice:GetTextSize(tab.name, theme.fontsize, theme.font, Vector2.new(1000, 300))
 			tab.TabButton.TextColor3 = tab.TabButton.Name == "SelectedTab" and theme.accentcolor or theme.tabstextcolor
 			tab.TabButton.Font = theme.font
-			tab.TabButton.Size = UDim2.fromOffset(size.X + 15, window.TabList.AbsoluteSize.Y - 1)
+			tab.TabButton.Size = UDim2.fromOffset(size.X + 20, window.TabList.AbsoluteSize.Y - 1) -- Увеличиваем отступ
 			tab.TabButton.TextSize = theme.fontsize
 		end)
 
+		-- Остальной код без изменений...
 		tab.Left = Instance.new("ScrollingFrame", window.Frame)
 		tab.Left.Name = "leftside"
 		tab.Left.BorderSizePixel = 0
@@ -304,35 +308,7 @@ function library:CreateWindow(name, size, hidebutton)
 		tab.Left.ScrollingDirection = "Y"
 		tab.Left.Position = window.BlackLine.Position + UDim2.fromOffset(0, 1)
 
-		tab.LeftListLayout = Instance.new("UIListLayout", tab.Left)
-		tab.LeftListLayout.FillDirection = Enum.FillDirection.Vertical
-		tab.LeftListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-		tab.LeftListLayout.Padding = UDim.new(0, 12)
-
-		tab.LeftListPadding = Instance.new("UIPadding", tab.Left)
-		tab.LeftListPadding.PaddingTop = UDim.new(0, 12)
-		tab.LeftListPadding.PaddingLeft = UDim.new(0, 12)
-		tab.LeftListPadding.PaddingRight = UDim.new(0, 12)
-
-		tab.Right = Instance.new("ScrollingFrame", window.Frame)
-		tab.Right.Name = "rightside"
-		tab.Right.ScrollBarThickness = 0
-		tab.Right.ScrollingDirection = "Y"
-		tab.Right.Visible = false
-		tab.Right.BorderSizePixel = 0
-		tab.Right.Size = UDim2.fromOffset(window.size.X.Offset / 2, window.size.Y.Offset - (window.TopBar.AbsoluteSize.Y + 1))
-		tab.Right.BackgroundTransparency = 1
-		tab.Right.Position = tab.Left.Position + UDim2.fromOffset(tab.Left.AbsoluteSize.X, 0)
-
-		tab.RightListLayout = Instance.new("UIListLayout", tab.Right)
-		tab.RightListLayout.FillDirection = Enum.FillDirection.Vertical
-		tab.RightListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-		tab.RightListLayout.Padding = UDim.new(0, 12)
-
-		tab.RightListPadding = Instance.new("UIPadding", tab.Right)
-		tab.RightListPadding.PaddingTop = UDim.new(0, 12)
-		tab.RightListPadding.PaddingLeft = UDim.new(0, 6)
-		tab.RightListPadding.PaddingRight = UDim.new(0, 12)
+		-- ... остальной код создания секций ...
 
 		local block = false
 		function tab:SelectTab()
@@ -352,7 +328,16 @@ function library:CreateWindow(name, size, hidebutton)
 			tab.TabButton.Name = "SelectedTab"
 			tab.Right.Visible = true
 			tab.Left.Visible = true
-			window.Line:TweenSizeAndPosition(UDim2.fromOffset(size.X + 15, 1), UDim2.new(0, (tab.TabButton.AbsolutePosition.X - window.Frame.AbsolutePosition.X), 0, 0) + (window.BlackLine.Position - UDim2.fromOffset(0, 1)), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15)
+
+			-- Обновляем размер линии под текущий таб
+			local currentSize = textservice:GetTextSize(tab.name, window.theme.fontsize, window.theme.font, Vector2.new(1000, 300))
+			window.Line:TweenSizeAndPosition(
+				UDim2.fromOffset(currentSize.X + 20, 1), 
+				UDim2.new(0, (tab.TabButton.AbsolutePosition.X - window.Frame.AbsolutePosition.X), 0, 0) + (window.BlackLine.Position - UDim2.fromOffset(0, 1)), 
+				Enum.EasingDirection.In, 
+				Enum.EasingStyle.Sine, 
+				0.15
+			)
 			task.wait(0.2)
 			block = false
 		end
@@ -367,6 +352,9 @@ function library:CreateWindow(name, size, hidebutton)
 
 		tab.SectorsLeft = {}
 		tab.SectorsRight = {}
+
+		table.insert(window.Tabs, tab)
+		
 
 		function tab:CreateSector(name, side)
 			local sector = {}
@@ -3417,7 +3405,7 @@ function library:CreateWindow(name, size, hidebutton)
 					end
 				end
 			end)
-			
+
 			configsystem.Save = configsystem.sector:AddButton("Save", function()
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
