@@ -357,8 +357,8 @@ function library:CreateWindow(name, size, hidebutton)
 							v.TabButton.TextColor3 = Color3.fromRGB(230, 230, 230)
 							v.TabButton.Name = "Tab"
 						end
-						if v.Left then v.Left.Visible = false end
-						if v.Right then v.Right.Visible = false end
+						if v.left then v.left.Visible = false end
+						if v.right then v.right.Visible = false end
 					end
 				end
 			end
@@ -368,8 +368,8 @@ function library:CreateWindow(name, size, hidebutton)
 				tab.TabButton.TextColor3 = window.theme.accentcolor
 				tab.TabButton.Name = "SelectedTab"
 			end
-			if tab.Right then tab.Right.Visible = true end
-			if tab.Left then tab.Left.Visible = true end
+			if tab.right then tab.right.Visible = true end
+			if tab.left then tab.left.Visible = true end
 
 			-- Проверяем существование window.Line перед анимацией
 			if window.Line then
