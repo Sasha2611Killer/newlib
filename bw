@@ -352,8 +352,6 @@ function library:CreateWindow(name, size, hidebutton)
 
 		tab.SectorsLeft = {}
 		tab.SectorsRight = {}
-
-		table.insert(window.Tabs, tab)
 		
 
 		function tab:CreateSector(name, side)
