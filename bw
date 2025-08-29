@@ -532,17 +532,22 @@ function library:CreateWindow(name, size, hidebutton)
 				button.text = text or ""
 				button.callback = callback or function() end
 
-				-- Получаем текущее количество кнопок в секторе
-				local buttonCount = #sector.Buttons or 0
+				-- Инициализируем таблицу кнопок если ее нет
+				if not self.Buttons then
+					self.Buttons = {}
+				end
+
+				-- Получаем количество кнопок и рассчитываем позицию
+				local buttonCount = #self.Buttons
 				local buttonsPerRow = 4
 				local row = math.floor(buttonCount / buttonsPerRow)
 				local column = buttonCount % buttonsPerRow
 
 				-- Вычисляем размеры для маленьких кнопок
-				local containerWidth = sector.Main.Size.X.Offset - 12
+				local containerWidth = self.Main.Size.X.Offset - 12
 				local buttonWidth = (containerWidth - 9) / buttonsPerRow  -- 9px отступов между 4 кнопками
 
-				button.Main = Instance.new("TextButton", sector.Items)
+				button.Main = Instance.new("TextButton", self.Items)
 				button.Main.BorderSizePixel = 0
 				button.Main.Text = ""
 				button.Main.AutoButtonColor = false
@@ -618,14 +623,11 @@ function library:CreateWindow(name, size, hidebutton)
 					button.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
 				end)
 
-				-- Сохраняем кнопку в таблице сектора
-				if not sector.Buttons then
-					sector.Buttons = {}
-				end
-				table.insert(sector.Buttons, button)
+				-- Добавляем кнопку в таблицу
+				table.insert(self.Buttons, button)
 
-				-- Обновляем размер сектора с учетом нового ряда кнопок
-				sector:FixSize()
+				-- Обновляем размер сектора
+				self:FixSize()
 
 				return button
 			end
