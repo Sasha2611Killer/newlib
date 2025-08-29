@@ -625,16 +625,16 @@ function library:CreateWindow(name, size, hidebutton)
 					-- Уменьшаем размер основной кнопки чтобы освободить место для под-кнопки
 					self.Main.Size = UDim2.new(0.5, -2, 0, 14)
 
-					-- Создаем под-кнопку в том же родителе что и основная кнопка
-					subButton.Main = Instance.new("TextButton", self.Main.Parent)
+					-- Создаем под-кнопку как дочерний элемент основной кнопки
+					subButton.Main = Instance.new("TextButton", self.Main)
 					subButton.Main.BorderSizePixel = 0
 					subButton.Main.Text = ""
 					subButton.Main.AutoButtonColor = false
 					subButton.Main.Name = "subButton"
-					subButton.Main.ZIndex = 5
+					subButton.Main.ZIndex = 7 -- Выше чем у основной кнопки
 					subButton.Main.Size = UDim2.fromOffset(self.Main.AbsoluteSize.X - 2, 14)
-					-- Позиционируем под-кнопку справа от основной кнопки на том же уровне Y
-					subButton.Main.Position = UDim2.new(0, self.Main.Position.X.Offset + self.Main.Size.X.Offset + 3, 0, self.Main.Position.Y.Offset)
+					-- Позиционируем под-кнопку справа от основной кнопки
+					subButton.Main.Position = UDim2.new(1, 3, 0, 0)
 					subButton.Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 
 					subButton.Gradient = Instance.new("UIGradient", subButton.Main)
@@ -646,7 +646,7 @@ function library:CreateWindow(name, size, hidebutton)
 
 					subButton.BlackOutline2 = Instance.new("Frame", subButton.Main)
 					subButton.BlackOutline2.Name = "blackline"
-					subButton.BlackOutline2.ZIndex = 4
+					subButton.BlackOutline2.ZIndex = 6
 					subButton.BlackOutline2.Size = subButton.Main.Size + UDim2.fromOffset(6, 6)
 					subButton.BlackOutline2.BorderSizePixel = 0
 					subButton.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
@@ -657,7 +657,7 @@ function library:CreateWindow(name, size, hidebutton)
 
 					subButton.Outline = Instance.new("Frame", subButton.Main)
 					subButton.Outline.Name = "blackline"
-					subButton.Outline.ZIndex = 4
+					subButton.Outline.ZIndex = 6
 					subButton.Outline.Size = subButton.Main.Size + UDim2.fromOffset(4, 4)
 					subButton.Outline.BorderSizePixel = 0
 					subButton.Outline.BackgroundColor3 = window.theme.outlinecolor
@@ -668,7 +668,7 @@ function library:CreateWindow(name, size, hidebutton)
 
 					subButton.BlackOutline = Instance.new("Frame", subButton.Main)
 					subButton.BlackOutline.Name = "blackline"
-					subButton.BlackOutline.ZIndex = 4
+					subButton.BlackOutline.ZIndex = 6
 					subButton.BlackOutline.Size = subButton.Main.Size + UDim2.fromOffset(2, 2)
 					subButton.BlackOutline.BorderSizePixel = 0
 					subButton.BlackOutline.BackgroundColor3 = window.theme.outlinecolor2
@@ -681,7 +681,7 @@ function library:CreateWindow(name, size, hidebutton)
 					subButton.Label.Name = "Label"
 					subButton.Label.BackgroundTransparency = 1
 					subButton.Label.Position = UDim2.new(0, -1, 0, 0)
-					subButton.Label.ZIndex = 5
+					subButton.Label.ZIndex = 7
 					subButton.Label.Size = subButton.Main.Size
 					subButton.Label.Font = window.theme.font
 					subButton.Label.Text = subButton.text
@@ -719,7 +719,7 @@ function library:CreateWindow(name, size, hidebutton)
 				return button
 			end
 
-			-- Обновленная функция FixSize()
+			-- Функция FixSize остается прежней
 			function sector:FixSize()
 				local totalHeight = 10 -- Базовые отступы
 
@@ -730,14 +730,6 @@ function library:CreateWindow(name, size, hidebutton)
 						local buttonBottom = btn.Main.Position.Y.Offset + btn.Main.Size.Y.Offset
 						if buttonBottom > maxY then
 							maxY = buttonBottom
-						end
-
-						-- Проверяем под-кнопки
-						for _, subBtn in ipairs(btn.SubButtons) do
-							local subButtonBottom = subBtn.Main.Position.Y.Offset + subBtn.Main.Size.Y.Offset
-							if subButtonBottom > maxY then
-								maxY = subButtonBottom
-							end
 						end
 					end
 					totalHeight = totalHeight + maxY + 5 -- Добавляем отступ снизу
