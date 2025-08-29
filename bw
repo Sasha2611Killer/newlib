@@ -275,6 +275,7 @@ function library:CreateWindow(name, size, hidebutton)
 
 		local size = textservice:GetTextSize(tab.name, window.theme.fontsize, window.theme.font, Vector2.new(200, 300))
 
+		-- Создание кнопки вкладки
 		tab.TabButton = Instance.new("TextButton", window.TabList)
 		tab.TabButton.TextColor3 = window.theme.tabstextcolor
 		tab.TabButton.Text = tab.name
@@ -286,6 +287,8 @@ function library:CreateWindow(name, size, hidebutton)
 		tab.TabButton.Size = UDim2.fromOffset(size.X + 15, window.TabList.AbsoluteSize.Y - 1)
 		tab.TabButton.Name = tab.name
 		tab.TabButton.TextSize = window.theme.fontsize
+
+		-- Обновление темы
 		updateevent.Event:Connect(function(theme)
 			local size = textservice:GetTextSize(tab.name, theme.fontsize, theme.font, Vector2.new(200, 300))
 			tab.TabButton.TextColor3 = tab.TabButton.Name == "SelectedTab" and theme.accentcolor or theme.tabstextcolor
@@ -294,14 +297,18 @@ function library:CreateWindow(name, size, hidebutton)
 			tab.TabButton.TextSize = theme.fontsize
 		end)
 
+		-- Левая сторона с прокруткой
 		tab.Left = Instance.new("ScrollingFrame", window.Frame)
 		tab.Left.Name = "leftside"
 		tab.Left.BorderSizePixel = 0
 		tab.Left.Size = UDim2.fromOffset(window.size.X.Offset / 2, window.size.Y.Offset - (window.TopBar.AbsoluteSize.Y + 1))
 		tab.Left.BackgroundTransparency = 1
 		tab.Left.Visible = false
-		tab.Left.ScrollBarThickness = 0
-		tab.Left.ScrollingDirection = "Y"
+		tab.Left.ScrollBarThickness = 6
+		tab.Left.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
+		tab.Left.ScrollingDirection = Enum.ScrollingDirection.Y
+		tab.Left.ScrollingEnabled = true
+		tab.Left.AutomaticCanvasSize = Enum.AutomaticSize.Y -- Автоматический размер канваса
 		tab.Left.Position = window.BlackLine.Position + UDim2.fromOffset(0, 1)
 
 		tab.LeftListLayout = Instance.new("UIListLayout", tab.Left)
@@ -314,10 +321,14 @@ function library:CreateWindow(name, size, hidebutton)
 		tab.LeftListPadding.PaddingLeft = UDim.new(0, 12)
 		tab.LeftListPadding.PaddingRight = UDim.new(0, 12)
 
+		-- Правая сторона с прокруткой
 		tab.Right = Instance.new("ScrollingFrame", window.Frame)
 		tab.Right.Name = "rightside"
-		tab.Right.ScrollBarThickness = 0
-		tab.Right.ScrollingDirection = "Y"
+		tab.Right.ScrollBarThickness = 6
+		tab.Right.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
+		tab.Right.ScrollingDirection = Enum.ScrollingDirection.Y
+		tab.Right.ScrollingEnabled = true
+		tab.Right.AutomaticCanvasSize = Enum.AutomaticSize.Y -- Автоматический размер канваса
 		tab.Right.Visible = false
 		tab.Right.BorderSizePixel = 0
 		tab.Right.Size = UDim2.fromOffset(window.size.X.Offset / 2, window.size.Y.Offset - (window.TopBar.AbsoluteSize.Y + 1))
@@ -334,14 +345,23 @@ function library:CreateWindow(name, size, hidebutton)
 		tab.RightListPadding.PaddingLeft = UDim.new(0, 6)
 		tab.RightListPadding.PaddingRight = UDim.new(0, 12)
 
+		-- Автоматическое обновление размеров канваса
+		tab.LeftListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+			tab.Left.CanvasSize = UDim2.new(0, 0, 0, tab.LeftListLayout.AbsoluteContentSize.Y + 24)
+		end)
+
+		tab.RightListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+			tab.Right.CanvasSize = UDim2.new(0, 0, 0, tab.RightListLayout.AbsoluteContentSize.Y + 24)
+		end)
+
 		local block = false
 		function tab:SelectTab()
 			repeat task.wait() until not block
 
 			block = true
-			for i, v in (window.Tabs) do
+			for i, v in pairs(window.Tabs) do
 				if v ~= tab then
-					v.TabButton.TextColor3 = Color3.fromRGB(230, 230, 230)
+					v.TabButton.TextColor3 = window.theme.tabstextcolor
 					v.TabButton.Name = "Tab"
 					v.Left.Visible = false
 					v.Right.Visible = false
