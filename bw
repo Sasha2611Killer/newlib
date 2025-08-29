@@ -719,6 +719,33 @@ function library:CreateWindow(name, size, hidebutton)
 				return button
 			end
 
+			-- Обновленная функция FixSize()
+			function sector:FixSize()
+				local totalHeight = 10 -- Базовые отступы
+
+				if self.Buttons and #self.Buttons > 0 then
+					-- Находим максимальную Y-позицию среди всех кнопок
+					local maxY = 0
+					for _, btn in ipairs(self.Buttons) do
+						local buttonBottom = btn.Main.Position.Y.Offset + btn.Main.Size.Y.Offset
+						if buttonBottom > maxY then
+							maxY = buttonBottom
+						end
+
+						-- Проверяем под-кнопки
+						for _, subBtn in ipairs(btn.SubButtons) do
+							local subButtonBottom = subBtn.Main.Position.Y.Offset + subBtn.Main.Size.Y.Offset
+							if subButtonBottom > maxY then
+								maxY = subButtonBottom
+							end
+						end
+					end
+					totalHeight = totalHeight + maxY + 5 -- Добавляем отступ снизу
+				end
+
+				self.Main.Size = UDim2.new(1, 0, 0, totalHeight)
+				self.Items.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
+			end
 
 			function sector:AddLabel(text)
 				local label = {}
