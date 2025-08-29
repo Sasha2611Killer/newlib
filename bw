@@ -540,7 +540,7 @@ function library:CreateWindow(name, size, hidebutton)
 					currentY = lastButton.Outer.Position.Y.Offset + lastButton.Outer.Size.Y.Offset + 2
 				end
 
-				-- Создаем основную кнопку (аналог Outer из примера)
+				-- Создаем основную кнопку
 				button.Outer = Instance.new("Frame", self.Items)
 				button.Outer.BackgroundColor3 = Color3.new(0, 0, 0)
 				button.Outer.BorderSizePixel = 0
@@ -549,7 +549,7 @@ function library:CreateWindow(name, size, hidebutton)
 				button.Outer.ZIndex = 5
 				button.Outer.Name = "button"
 
-				-- Внутренняя рамка (аналог Inner из примера)
+				-- Внутренняя рамка
 				button.Inner = Instance.new("Frame", button.Outer)
 				button.Inner.BackgroundColor3 = window.theme.maincolor
 				button.Inner.BorderSizePixel = 1
@@ -557,7 +557,7 @@ function library:CreateWindow(name, size, hidebutton)
 				button.Inner.Size = UDim2.new(1, 0, 1, 0)
 				button.Inner.ZIndex = 6
 
-				-- Градиент для внутренней рамки
+				-- Градиент
 				local gradient = Instance.new("UIGradient", button.Inner)
 				gradient.Color = ColorSequence.new({
 					ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
@@ -581,9 +581,7 @@ function library:CreateWindow(name, size, hidebutton)
 				-- Обработка кликов
 				button.Outer.InputBegan:Connect(function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 then
-						if not button.Locked then
-							button.callback()
-						end
+						button.callback()
 					end
 				end)
 
@@ -596,7 +594,7 @@ function library:CreateWindow(name, size, hidebutton)
 					button.Outer.BorderColor3 = Color3.new(0, 0, 0)
 				end)
 
-				-- Функция для добавления под-кнопки (как в вашем примере)
+				-- Функция для добавления под-кнопки
 				function button:AddButton(subText, subCallback)
 					local subButton = {}
 					subButton.text = subText or ""
@@ -605,12 +603,12 @@ function library:CreateWindow(name, size, hidebutton)
 					-- Уменьшаем размер основной кнопки
 					self.Outer.Size = UDim2.new(0.5, -2, 0, 20)
 
-					-- Создаем под-кнопку
-					subButton.Outer = Instance.new("Frame", self.Outer)
+					-- Создаем под-кнопку в том же родителе что и основная
+					subButton.Outer = Instance.new("Frame", self.Outer.Parent)
 					subButton.Outer.BackgroundColor3 = Color3.new(0, 0, 0)
 					subButton.Outer.BorderSizePixel = 0
-					subButton.Outer.Size = UDim2.fromOffset(self.Outer.AbsoluteSize.X - 2, self.Outer.AbsoluteSize.Y)
-					subButton.Outer.Position = UDim2.new(1, 3, 0, 0)
+					subButton.Outer.Size = UDim2.new(0.5, -2, 0, 20)
+					subButton.Outer.Position = UDim2.new(0, self.Outer.Position.X.Offset + self.Outer.Size.X.Offset + 3, 0, self.Outer.Position.Y.Offset)
 					subButton.Outer.ZIndex = 5
 
 					-- Внутренняя рамка под-кнопки
@@ -669,23 +667,7 @@ function library:CreateWindow(name, size, hidebutton)
 				end
 				table.insert(self.Buttons, button)
 
-				-- Обновляем размер сектора
-				self:FixSize()
-
 				return button
-			end
-
-			-- Обновленная функция FixSize
-			function sector:FixSize()
-				local totalHeight = 10 -- Базовые отступы
-
-				if self.Buttons and #self.Buttons > 0 then
-					local lastButton = self.Buttons[#self.Buttons]
-					totalHeight = lastButton.Outer.Position.Y.Offset + lastButton.Outer.Size.Y.Offset + 10
-				end
-
-				self.Main.Size = UDim2.new(1, 0, 0, totalHeight)
-				self.Items.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 			end
 
 			function sector:AddLabel(text)
