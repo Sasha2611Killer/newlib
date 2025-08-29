@@ -226,6 +226,7 @@ function library:CreateWindow(name, size, hidebutton)
 	window.TabScrollingFrame.Size = UDim2.new(1, 0, 1, 0)
 	window.TabScrollingFrame.BackgroundTransparency = 1
 	window.TabScrollingFrame.BorderSizePixel = 0
+	window.TabScrollingFrame.ScrollBarImageTransparency = 1
 	window.TabScrollingFrame.ScrollBarThickness = 3
 	window.TabScrollingFrame.ScrollingDirection = Enum.ScrollingDirection.X
 	window.TabScrollingFrame.VerticalScrollBarInset = Enum.ScrollBarInset.None
