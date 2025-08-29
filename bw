@@ -527,12 +527,11 @@ function library:CreateWindow(name, size, hidebutton)
 				tab.Right.CanvasSize = UDim2.fromOffset(tab.Right.AbsoluteSize.X, sizeright + ((#tab.SectorsRight - 1) * tab.RightListPadding.PaddingTop.Offset) + 20)
 			end
 
-			function sector:AddButton(options)
+			function sector:AddButton(text, callback, id)
 				local button = {}
-				button.Text = options.Text or ""
-				button.Func = options.Func or function() end
-				button.DoubleClick = options.DoubleClick or false
-				button.Tooltip = options.Tooltip or ""
+				button.text = text or ""
+				button.callback = callback or function() end
+				button.id = id or ""
 				button.SubButtons = {}
 
 				-- Инициализируем таблицу кнопок если ее нет
@@ -596,11 +595,12 @@ function library:CreateWindow(name, size, hidebutton)
 				button.Label.ZIndex = 5
 				button.Label.Size = button.Main.Size
 				button.Label.Font = window.theme.font
-				button.Label.Text = button.Text
+				button.Label.Text = button.text
 				button.Label.TextColor3 = window.theme.itemscolor2
 				button.Label.TextSize = 15
 				button.Label.TextStrokeTransparency = 1
 				button.Label.TextXAlignment = Enum.TextXAlignment.Center
+				button.Main.MouseButton1Down:Connect(button.callback)
 				updateevent.Event:Connect(function(theme)
 					button.Label.Font = theme.font
 					button.Label.TextColor3 = theme.itemscolor
@@ -608,41 +608,19 @@ function library:CreateWindow(name, size, hidebutton)
 
 				-- Контейнер для под-кнопок (изначально скрыт)
 				button.SubButtonsContainer = Instance.new("Frame", self.Items)
-				button.SubButtonsContainer.Name = "SubButtonsContainer"
+				button.SubButtonsContainer.Name = "SubButtonsContainer_" .. (id or "")
 				button.SubButtonsContainer.BackgroundTransparency = 1
 				button.SubButtonsContainer.Size = UDim2.new(1, -12, 0, 0)
-				button.SubButtonsContainer.Position = UDim2.fromOffset(0, 17)
+				button.SubButtonsContainer.Position = UDim2.fromOffset(0, button.Main.Position.Y.Offset + 17)
 				button.SubButtonsContainer.Visible = false
 				button.SubButtonsContainer.ZIndex = 6
 
-				-- Функция для обработки кликов
-				local clickCount = 0
-				local clickTime = 0
-
-				local function handleClick()
-					if button.DoubleClick then
-						local currentTime = tick()
-						if currentTime - clickTime < 0.5 then -- Двойной клик в течение 0.5 секунд
-							clickCount = 0
-							button.Func()
-						else
-							clickCount = 1
-							clickTime = currentTime
-						end
-					else
-						button.Func()
-					end
-				end
-
-				button.Main.MouseButton1Down:Connect(handleClick)
-
 				-- Функция для добавления под-кнопки
-				function button:AddButton(subOptions)
+				function button:AddButton(subText, subCallback, subId)
 					local subButton = {}
-					subButton.Text = subOptions.Text or ""
-					subButton.Func = subOptions.Func or function() end
-					subButton.DoubleClick = subOptions.DoubleClick or false
-					subButton.Tooltip = subOptions.Tooltip or ""
+					subButton.text = subText or ""
+					subButton.callback = subCallback or function() end
+					subButton.id = subId or ""
 
 					-- Показываем контейнер под-кнопок при добавлении первой под-кнопки
 					if #self.SubButtons == 0 then
@@ -654,7 +632,7 @@ function library:CreateWindow(name, size, hidebutton)
 					subButton.Main.BorderSizePixel = 0
 					subButton.Main.Text = ""
 					subButton.Main.AutoButtonColor = false
-					subButton.Main.Name = "subButton"
+					subButton.Main.Name = "subButton_" .. (subId or "")
 					subButton.Main.ZIndex = 7
 					subButton.Main.Size = UDim2.fromOffset(self.SubButtonsContainer.Size.X.Offset, 14)
 					subButton.Main.Position = UDim2.fromOffset(0, (#self.SubButtons) * 17)
@@ -707,33 +685,15 @@ function library:CreateWindow(name, size, hidebutton)
 					subButton.Label.ZIndex = 7
 					subButton.Label.Size = subButton.Main.Size
 					subButton.Label.Font = window.theme.font
-					subButton.Label.Text = subButton.Text
+					subButton.Label.Text = subButton.text
 					subButton.Label.TextColor3 = window.theme.itemscolor2
 					subButton.Label.TextSize = 15
 					subButton.Label.TextStrokeTransparency = 1
 					subButton.Label.TextXAlignment = Enum.TextXAlignment.Center
+					subButton.Main.MouseButton1Down:Connect(subButton.callback)
 					updateevent.Event:Connect(function(theme)
 						subButton.Label.Font = theme.font
 						subButton.Label.TextColor3 = theme.itemscolor
-					end)
-
-					-- Обработка кликов для под-кнопки
-					local subClickCount = 0
-					local subClickTime = 0
-
-					subButton.Main.MouseButton1Down:Connect(function()
-						if subButton.DoubleClick then
-							local currentTime = tick()
-							if currentTime - subClickTime < 0.5 then
-								subClickCount = 0
-								subButton.Func()
-							else
-								subClickCount = 1
-								subClickTime = currentTime
-							end
-						else
-							subButton.Func()
-						end
 					end)
 
 					table.insert(self.SubButtons, subButton)
