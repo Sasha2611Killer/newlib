@@ -537,61 +537,84 @@ function library:CreateWindow(name, size, hidebutton)
 				local currentY = 0
 				if self.Buttons and #self.Buttons > 0 then
 					local lastButton = self.Buttons[#self.Buttons]
-					currentY = lastButton.Outer.Position.Y.Offset + lastButton.Outer.Size.Y.Offset + 2
+					currentY = lastButton.Main.Position.Y.Offset + 17
 				end
 
-				-- Создаем основную кнопку
-				button.Outer = Instance.new("Frame", self.Items)
-				button.Outer.BackgroundColor3 = Color3.new(0, 0, 0)
-				button.Outer.BorderSizePixel = 0
-				button.Outer.Size = UDim2.new(1, -4, 0, 20)
-				button.Outer.Position = UDim2.fromOffset(2, currentY)
-				button.Outer.ZIndex = 5
-				button.Outer.Name = "button"
+				-- Создаем основную кнопку в вашем оригинальном стиле
+				button.Main = Instance.new("TextButton", self.Items)
+				button.Main.BorderSizePixel = 0
+				button.Main.Text = ""
+				button.Main.AutoButtonColor = false
+				button.Main.Name = "button"
+				button.Main.ZIndex = 5
+				button.Main.Size = UDim2.fromOffset(self.Main.Size.X.Offset - 12, 14)
+				button.Main.Position = UDim2.fromOffset(0, currentY)
+				button.Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 
-				-- Внутренняя рамка
-				button.Inner = Instance.new("Frame", button.Outer)
-				button.Inner.BackgroundColor3 = window.theme.maincolor
-				button.Inner.BorderSizePixel = 1
-				button.Inner.BorderColor3 = window.theme.outlinecolor
-				button.Inner.Size = UDim2.new(1, 0, 1, 0)
-				button.Inner.ZIndex = 6
+				button.Gradient = Instance.new("UIGradient", button.Main)
+				button.Gradient.Rotation = 90
+				button.Gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, window.theme.buttoncolor), ColorSequenceKeypoint.new(1, window.theme.buttoncolor2)})
+				updateevent.Event:Connect(function(theme)
+					button.Gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, theme.buttoncolor), ColorSequenceKeypoint.new(1, theme.buttoncolor2)})
+				end)
 
-				-- Градиент
-				local gradient = Instance.new("UIGradient", button.Inner)
-				gradient.Color = ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 212, 212))
-				})
-				gradient.Rotation = 90
+				button.BlackOutline2 = Instance.new("Frame", button.Main)
+				button.BlackOutline2.Name = "blackline"
+				button.BlackOutline2.ZIndex = 4
+				button.BlackOutline2.Size = button.Main.Size + UDim2.fromOffset(6, 6)
+				button.BlackOutline2.BorderSizePixel = 0
+				button.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
+				button.BlackOutline2.Position = UDim2.fromOffset(-3, -3)
+				updateevent.Event:Connect(function(theme)
+					button.BlackOutline2.BackgroundColor3 = theme.outlinecolor2
+				end)
 
-				-- Текст кнопки
-				button.Label = Instance.new("TextLabel", button.Inner)
+				button.Outline = Instance.new("Frame", button.Main)
+				button.Outline.Name = "blackline"
+				button.Outline.ZIndex = 4
+				button.Outline.Size = button.Main.Size + UDim2.fromOffset(4, 4)
+				button.Outline.BorderSizePixel = 0
+				button.Outline.BackgroundColor3 = window.theme.outlinecolor
+				button.Outline.Position = UDim2.fromOffset(-2, -2)
+				updateevent.Event:Connect(function(theme)
+					button.Outline.BackgroundColor3 = theme.outlinecolor
+				end)
+
+				button.BlackOutline = Instance.new("Frame", button.Main)
+				button.BlackOutline.Name = "blackline"
+				button.BlackOutline.ZIndex = 4
+				button.BlackOutline.Size = button.Main.Size + UDim2.fromOffset(2, 2)
+				button.BlackOutline.BorderSizePixel = 0
+				button.BlackOutline.BackgroundColor3 = window.theme.outlinecolor2
+				button.BlackOutline.Position = UDim2.fromOffset(-1, -1)
+				updateevent.Event:Connect(function(theme)
+					button.BlackOutline.BackgroundColor3 = theme.outlinecolor2
+				end)
+
+				button.Label = Instance.new("TextLabel", button.Main)
 				button.Label.Name = "Label"
 				button.Label.BackgroundTransparency = 1
-				button.Label.Size = UDim2.new(1, 0, 1, 0)
+				button.Label.Position = UDim2.new(0, -1, 0, 0)
+				button.Label.ZIndex = 5
+				button.Label.Size = button.Main.Size
 				button.Label.Font = window.theme.font
 				button.Label.Text = button.text
-				button.Label.TextColor3 = window.theme.fontcolor
-				button.Label.TextSize = 14
+				button.Label.TextColor3 = window.theme.itemscolor2
+				button.Label.TextSize = 15
 				button.Label.TextStrokeTransparency = 1
-				button.Label.ZIndex = 6
 				button.Label.TextXAlignment = Enum.TextXAlignment.Center
-
-				-- Обработка кликов
-				button.Outer.InputBegan:Connect(function(input)
-					if input.UserInputType == Enum.UserInputType.MouseButton1 then
-						button.callback()
-					end
+				button.Main.MouseButton1Down:Connect(button.callback)
+				updateevent.Event:Connect(function(theme)
+					button.Label.Font = theme.font
+					button.Label.TextColor3 = theme.itemscolor
 				end)
 
-				-- Подсветка при наведении
-				button.Outer.MouseEnter:Connect(function()
-					button.Outer.BorderColor3 = window.theme.accentcolor
+				button.BlackOutline2.MouseEnter:Connect(function()
+					button.BlackOutline2.BackgroundColor3 = window.theme.accentcolor
 				end)
 
-				button.Outer.MouseLeave:Connect(function()
-					button.Outer.BorderColor3 = Color3.new(0, 0, 0)
+				button.BlackOutline2.MouseLeave:Connect(function()
+					button.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
 				end)
 
 				-- Функция для добавления под-кнопки
@@ -601,59 +624,84 @@ function library:CreateWindow(name, size, hidebutton)
 					subButton.callback = subCallback or function() end
 
 					-- Уменьшаем размер основной кнопки
-					self.Outer.Size = UDim2.new(0.5, -2, 0, 20)
+					local originalWidth = self.Main.Size.X.Offset
+					self.Main.Size = UDim2.new(0.5, -2, 0, 14)
 
 					-- Создаем под-кнопку в том же родителе что и основная
-					subButton.Outer = Instance.new("Frame", self.Outer.Parent)
-					subButton.Outer.BackgroundColor3 = Color3.new(0, 0, 0)
-					subButton.Outer.BorderSizePixel = 0
-					subButton.Outer.Size = UDim2.new(0.5, -2, 0, 20)
-					subButton.Outer.Position = UDim2.new(0, self.Outer.Position.X.Offset + self.Outer.Size.X.Offset + 3, 0, self.Outer.Position.Y.Offset)
-					subButton.Outer.ZIndex = 5
+					subButton.Main = Instance.new("TextButton", self.Main.Parent)
+					subButton.Main.BorderSizePixel = 0
+					subButton.Main.Text = ""
+					subButton.Main.AutoButtonColor = false
+					subButton.Main.Name = "subButton"
+					subButton.Main.ZIndex = 5
+					subButton.Main.Size = UDim2.fromOffset(originalWidth / 2 - 2, 14)
+					subButton.Main.Position = UDim2.new(0, self.Main.Position.X.Offset + self.Main.Size.X.Offset + 3, 0, self.Main.Position.Y.Offset)
+					subButton.Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 
-					-- Внутренняя рамка под-кнопки
-					subButton.Inner = Instance.new("Frame", subButton.Outer)
-					subButton.Inner.BackgroundColor3 = window.theme.maincolor
-					subButton.Inner.BorderSizePixel = 1
-					subButton.Inner.BorderColor3 = window.theme.outlinecolor
-					subButton.Inner.Size = UDim2.new(1, 0, 1, 0)
-					subButton.Inner.ZIndex = 6
+					subButton.Gradient = Instance.new("UIGradient", subButton.Main)
+					subButton.Gradient.Rotation = 90
+					subButton.Gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, window.theme.buttoncolor), ColorSequenceKeypoint.new(1, window.theme.buttoncolor2)})
+					updateevent.Event:Connect(function(theme)
+						subButton.Gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, theme.buttoncolor), ColorSequenceKeypoint.new(1, theme.buttoncolor2)})
+					end)
 
-					-- Градиент для под-кнопки
-					local subGradient = Instance.new("UIGradient", subButton.Inner)
-					subGradient.Color = ColorSequence.new({
-						ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-						ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 212, 212))
-					})
-					subGradient.Rotation = 90
+					subButton.BlackOutline2 = Instance.new("Frame", subButton.Main)
+					subButton.BlackOutline2.Name = "blackline"
+					subButton.BlackOutline2.ZIndex = 4
+					subButton.BlackOutline2.Size = subButton.Main.Size + UDim2.fromOffset(6, 6)
+					subButton.BlackOutline2.BorderSizePixel = 0
+					subButton.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
+					subButton.BlackOutline2.Position = UDim2.fromOffset(-3, -3)
+					updateevent.Event:Connect(function(theme)
+						subButton.BlackOutline2.BackgroundColor3 = theme.outlinecolor2
+					end)
 
-					-- Текст под-кнопки
-					subButton.Label = Instance.new("TextLabel", subButton.Inner)
+					subButton.Outline = Instance.new("Frame", subButton.Main)
+					subButton.Outline.Name = "blackline"
+					subButton.Outline.ZIndex = 4
+					subButton.Outline.Size = subButton.Main.Size + UDim2.fromOffset(4, 4)
+					subButton.Outline.BorderSizePixel = 0
+					subButton.Outline.BackgroundColor3 = window.theme.outlinecolor
+					subButton.Outline.Position = UDim2.fromOffset(-2, -2)
+					updateevent.Event:Connect(function(theme)
+						subButton.Outline.BackgroundColor3 = theme.outlinecolor
+					end)
+
+					subButton.BlackOutline = Instance.new("Frame", subButton.Main)
+					subButton.BlackOutline.Name = "blackline"
+					subButton.BlackOutline.ZIndex = 4
+					subButton.BlackOutline.Size = subButton.Main.Size + UDim2.fromOffset(2, 2)
+					subButton.BlackOutline.BorderSizePixel = 0
+					subButton.BlackOutline.BackgroundColor3 = window.theme.outlinecolor2
+					subButton.BlackOutline.Position = UDim2.fromOffset(-1, -1)
+					updateevent.Event:Connect(function(theme)
+						subButton.BlackOutline.BackgroundColor3 = theme.outlinecolor2
+					end)
+
+					subButton.Label = Instance.new("TextLabel", subButton.Main)
 					subButton.Label.Name = "Label"
 					subButton.Label.BackgroundTransparency = 1
-					subButton.Label.Size = UDim2.new(1, 0, 1, 0)
+					subButton.Label.Position = UDim2.new(0, -1, 0, 0)
+					subButton.Label.ZIndex = 5
+					subButton.Label.Size = subButton.Main.Size
 					subButton.Label.Font = window.theme.font
 					subButton.Label.Text = subButton.text
-					subButton.Label.TextColor3 = window.theme.fontcolor
-					subButton.Label.TextSize = 14
+					subButton.Label.TextColor3 = window.theme.itemscolor2
+					subButton.Label.TextSize = 15
 					subButton.Label.TextStrokeTransparency = 1
-					subButton.Label.ZIndex = 6
 					subButton.Label.TextXAlignment = Enum.TextXAlignment.Center
-
-					-- Обработка кликов под-кнопки
-					subButton.Outer.InputBegan:Connect(function(input)
-						if input.UserInputType == Enum.UserInputType.MouseButton1 then
-							subButton.callback()
-						end
+					subButton.Main.MouseButton1Down:Connect(subButton.callback)
+					updateevent.Event:Connect(function(theme)
+						subButton.Label.Font = theme.font
+						subButton.Label.TextColor3 = theme.itemscolor
 					end)
 
-					-- Подсветка под-кнопки
-					subButton.Outer.MouseEnter:Connect(function()
-						subButton.Outer.BorderColor3 = window.theme.accentcolor
+					subButton.BlackOutline2.MouseEnter:Connect(function()
+						subButton.BlackOutline2.BackgroundColor3 = window.theme.accentcolor
 					end)
 
-					subButton.Outer.MouseLeave:Connect(function()
-						subButton.Outer.BorderColor3 = Color3.new(0, 0, 0)
+					subButton.BlackOutline2.MouseLeave:Connect(function()
+						subButton.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
 					end)
 
 					table.insert(self.SubButtons, subButton)
