@@ -532,29 +532,13 @@ function library:CreateWindow(name, size, hidebutton)
 				button.text = text or ""
 				button.callback = callback or function() end
 
-				-- Инициализируем таблицу кнопок если ее нет
-				if not self.Buttons then
-					self.Buttons = {}
-				end
-
-				-- Получаем количество кнопок и рассчитываем позицию
-				local buttonCount = #self.Buttons
-				local buttonsPerRow = 4
-				local row = math.floor(buttonCount / buttonsPerRow)
-				local column = buttonCount % buttonsPerRow
-
-				-- Вычисляем размеры для маленьких кнопок
-				local containerWidth = self.Main.Size.X.Offset - 12
-				local buttonWidth = (containerWidth - 9) / buttonsPerRow  -- 9px отступов между 4 кнопками
-
-				button.Main = Instance.new("TextButton", self.Items)
+				button.Main = Instance.new("TextButton", sector.Items)
 				button.Main.BorderSizePixel = 0
 				button.Main.Text = ""
 				button.Main.AutoButtonColor = false
 				button.Main.Name = "button"
 				button.Main.ZIndex = 5
-				button.Main.Size = UDim2.fromOffset(buttonWidth, 14)
-				button.Main.Position = UDim2.fromOffset((buttonWidth + 3) * column, row * 17)  -- 3px отступ, 17px высота кнопки с отступами
+				button.Main.Size = UDim2.fromOffset(sector.Main.Size.X.Offset - 12, 14)
 				button.Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 
 				button.Gradient = Instance.new("UIGradient", button.Main)
@@ -570,7 +554,7 @@ function library:CreateWindow(name, size, hidebutton)
 				button.BlackOutline2.Size = button.Main.Size + UDim2.fromOffset(6, 6)
 				button.BlackOutline2.BorderSizePixel = 0
 				button.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
-				button.BlackOutline2.Position = UDim2.fromOffset(-3, -3)
+				button.BlackOutline2.Position = UDim2.fromOffset(- 3, - 3)
 				updateevent.Event:Connect(function(theme)
 					button.BlackOutline2.BackgroundColor3 = theme.outlinecolor2
 				end)
@@ -581,7 +565,7 @@ function library:CreateWindow(name, size, hidebutton)
 				button.Outline.Size = button.Main.Size + UDim2.fromOffset(4, 4)
 				button.Outline.BorderSizePixel = 0
 				button.Outline.BackgroundColor3 = window.theme.outlinecolor
-				button.Outline.Position = UDim2.fromOffset(-2, -2)
+				button.Outline.Position = UDim2.fromOffset(- 2, - 2)
 				updateevent.Event:Connect(function(theme)
 					button.Outline.BackgroundColor3 = theme.outlinecolor
 				end)
@@ -592,7 +576,7 @@ function library:CreateWindow(name, size, hidebutton)
 				button.BlackOutline.Size = button.Main.Size + UDim2.fromOffset(2, 2)
 				button.BlackOutline.BorderSizePixel = 0
 				button.BlackOutline.BackgroundColor3 = window.theme.outlinecolor2
-				button.BlackOutline.Position = UDim2.fromOffset(-1, -1)
+				button.BlackOutline.Position = UDim2.fromOffset(- 1, - 1)
 				updateevent.Event:Connect(function(theme)
 					button.BlackOutline.BackgroundColor3 = theme.outlinecolor2
 				end)
@@ -600,7 +584,7 @@ function library:CreateWindow(name, size, hidebutton)
 				button.Label = Instance.new("TextLabel", button.Main)
 				button.Label.Name = "Label"
 				button.Label.BackgroundTransparency = 1
-				button.Label.Position = UDim2.new(0, -1, 0, 0)
+				button.Label.Position = UDim2.new(0, - 1, 0, 0)
 				button.Label.ZIndex = 5
 				button.Label.Size = button.Main.Size
 				button.Label.Font = window.theme.font
@@ -623,11 +607,7 @@ function library:CreateWindow(name, size, hidebutton)
 					button.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
 				end)
 
-				-- Добавляем кнопку в таблицу
-				table.insert(self.Buttons, button)
-
-				-- Обновляем размер сектора
-				self:FixSize()
+				sector:FixSize()
 
 				return button
 			end
