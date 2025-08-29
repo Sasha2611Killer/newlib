@@ -533,13 +533,21 @@ function library:CreateWindow(name, size, hidebutton)
 				button.callback = callback or function() end
 				button.SubButtons = {}
 
-				button.Main = Instance.new("TextButton", sector.Items)
+				-- Сохраняем текущую позицию Y для новой кнопки
+				local currentY = 0
+				if self.Buttons and #self.Buttons > 0 then
+					local lastButton = self.Buttons[#self.Buttons]
+					currentY = lastButton.Main.Position.Y.Offset + 17 -- 17 = высота кнопки + отступ
+				end
+
+				button.Main = Instance.new("TextButton", self.Items)
 				button.Main.BorderSizePixel = 0
 				button.Main.Text = ""
 				button.Main.AutoButtonColor = false
 				button.Main.Name = "button"
 				button.Main.ZIndex = 5
-				button.Main.Size = UDim2.fromOffset(sector.Main.Size.X.Offset - 12, 14)
+				button.Main.Size = UDim2.fromOffset(self.Main.Size.X.Offset - 12, 14)
+				button.Main.Position = UDim2.fromOffset(0, currentY)
 				button.Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 
 				button.Gradient = Instance.new("UIGradient", button.Main)
@@ -617,6 +625,7 @@ function library:CreateWindow(name, size, hidebutton)
 					-- Уменьшаем размер основной кнопки чтобы освободить место для под-кнопки
 					self.Main.Size = UDim2.new(0.5, -2, 0, 14)
 
+					-- Создаем под-кнопку в том же родителе что и основная кнопка
 					subButton.Main = Instance.new("TextButton", self.Main.Parent)
 					subButton.Main.BorderSizePixel = 0
 					subButton.Main.Text = ""
@@ -624,7 +633,8 @@ function library:CreateWindow(name, size, hidebutton)
 					subButton.Main.Name = "subButton"
 					subButton.Main.ZIndex = 5
 					subButton.Main.Size = UDim2.fromOffset(self.Main.AbsoluteSize.X - 2, 14)
-					subButton.Main.Position = UDim2.new(1, 3, 0, 0)
+					-- Позиционируем под-кнопку справа от основной кнопки на том же уровне Y
+					subButton.Main.Position = UDim2.new(0, self.Main.Position.X.Offset + self.Main.Size.X.Offset + 3, 0, self.Main.Position.Y.Offset)
 					subButton.Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 
 					subButton.Gradient = Instance.new("UIGradient", subButton.Main)
@@ -698,10 +708,17 @@ function library:CreateWindow(name, size, hidebutton)
 					return subButton
 				end
 
-				sector:FixSize()
+				-- Сохраняем кнопку в таблице сектора
+				if not self.Buttons then
+					self.Buttons = {}
+				end
+				table.insert(self.Buttons, button)
+
+				self:FixSize()
 
 				return button
 			end
+
 
 			function sector:AddLabel(text)
 				local label = {}
