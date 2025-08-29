@@ -531,23 +531,14 @@ function library:CreateWindow(name, size, hidebutton)
 				local button = {}
 				button.text = text or ""
 				button.callback = callback or function() end
-				button.SubButtons = {}
 
-				-- Сохраняем текущую позицию Y для новой кнопки
-				local currentY = 0
-				if self.Buttons and #self.Buttons > 0 then
-					local lastButton = self.Buttons[#self.Buttons]
-					currentY = lastButton.Main.Position.Y.Offset + 17 -- 17 = высота кнопки + отступ
-				end
-
-				button.Main = Instance.new("TextButton", self.Items)
+				button.Main = Instance.new("TextButton", sector.Items)
 				button.Main.BorderSizePixel = 0
 				button.Main.Text = ""
 				button.Main.AutoButtonColor = false
 				button.Main.Name = "button"
 				button.Main.ZIndex = 5
-				button.Main.Size = UDim2.fromOffset(self.Main.Size.X.Offset - 12, 14)
-				button.Main.Position = UDim2.fromOffset(0, currentY)
+				button.Main.Size = UDim2.fromOffset(sector.Main.Size.X.Offset - 12, 14)
 				button.Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 
 				button.Gradient = Instance.new("UIGradient", button.Main)
@@ -563,7 +554,7 @@ function library:CreateWindow(name, size, hidebutton)
 				button.BlackOutline2.Size = button.Main.Size + UDim2.fromOffset(6, 6)
 				button.BlackOutline2.BorderSizePixel = 0
 				button.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
-				button.BlackOutline2.Position = UDim2.fromOffset(-3, -3)
+				button.BlackOutline2.Position = UDim2.fromOffset(- 3, - 3)
 				updateevent.Event:Connect(function(theme)
 					button.BlackOutline2.BackgroundColor3 = theme.outlinecolor2
 				end)
@@ -574,7 +565,7 @@ function library:CreateWindow(name, size, hidebutton)
 				button.Outline.Size = button.Main.Size + UDim2.fromOffset(4, 4)
 				button.Outline.BorderSizePixel = 0
 				button.Outline.BackgroundColor3 = window.theme.outlinecolor
-				button.Outline.Position = UDim2.fromOffset(-2, -2)
+				button.Outline.Position = UDim2.fromOffset(- 2, - 2)
 				updateevent.Event:Connect(function(theme)
 					button.Outline.BackgroundColor3 = theme.outlinecolor
 				end)
@@ -585,7 +576,7 @@ function library:CreateWindow(name, size, hidebutton)
 				button.BlackOutline.Size = button.Main.Size + UDim2.fromOffset(2, 2)
 				button.BlackOutline.BorderSizePixel = 0
 				button.BlackOutline.BackgroundColor3 = window.theme.outlinecolor2
-				button.BlackOutline.Position = UDim2.fromOffset(-1, -1)
+				button.BlackOutline.Position = UDim2.fromOffset(- 1, - 1)
 				updateevent.Event:Connect(function(theme)
 					button.BlackOutline.BackgroundColor3 = theme.outlinecolor2
 				end)
@@ -593,7 +584,7 @@ function library:CreateWindow(name, size, hidebutton)
 				button.Label = Instance.new("TextLabel", button.Main)
 				button.Label.Name = "Label"
 				button.Label.BackgroundTransparency = 1
-				button.Label.Position = UDim2.new(0, -1, 0, 0)
+				button.Label.Position = UDim2.new(0, - 1, 0, 0)
 				button.Label.ZIndex = 5
 				button.Label.Size = button.Main.Size
 				button.Label.Font = window.theme.font
@@ -616,127 +607,9 @@ function library:CreateWindow(name, size, hidebutton)
 					button.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
 				end)
 
-				-- Функция для добавления под-кнопки
-				function button:AddButton(subText, subCallback)
-					local subButton = {}
-					subButton.text = subText or ""
-					subButton.callback = subCallback or function() end
-
-					-- Уменьшаем размер основной кнопки чтобы освободить место для под-кнопки
-					self.Main.Size = UDim2.new(0.5, -2, 0, 14)
-
-					-- Создаем под-кнопку как дочерний элемент основной кнопки
-					subButton.Main = Instance.new("TextButton", self.Main)
-					subButton.Main.BorderSizePixel = 0
-					subButton.Main.Text = ""
-					subButton.Main.AutoButtonColor = false
-					subButton.Main.Name = "subButton"
-					subButton.Main.ZIndex = 7 -- Выше чем у основной кнопки
-					subButton.Main.Size = UDim2.fromOffset(self.Main.AbsoluteSize.X - 2, 14)
-					-- Позиционируем под-кнопку справа от основной кнопки
-					subButton.Main.Position = UDim2.new(1, 3, 0, 0)
-					subButton.Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-
-					subButton.Gradient = Instance.new("UIGradient", subButton.Main)
-					subButton.Gradient.Rotation = 90
-					subButton.Gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, window.theme.buttoncolor), ColorSequenceKeypoint.new(1, window.theme.buttoncolor2)})
-					updateevent.Event:Connect(function(theme)
-						subButton.Gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, theme.buttoncolor), ColorSequenceKeypoint.new(1, theme.buttoncolor2)})
-					end)
-
-					subButton.BlackOutline2 = Instance.new("Frame", subButton.Main)
-					subButton.BlackOutline2.Name = "blackline"
-					subButton.BlackOutline2.ZIndex = 6
-					subButton.BlackOutline2.Size = subButton.Main.Size + UDim2.fromOffset(6, 6)
-					subButton.BlackOutline2.BorderSizePixel = 0
-					subButton.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
-					subButton.BlackOutline2.Position = UDim2.fromOffset(-3, -3)
-					updateevent.Event:Connect(function(theme)
-						subButton.BlackOutline2.BackgroundColor3 = theme.outlinecolor2
-					end)
-
-					subButton.Outline = Instance.new("Frame", subButton.Main)
-					subButton.Outline.Name = "blackline"
-					subButton.Outline.ZIndex = 6
-					subButton.Outline.Size = subButton.Main.Size + UDim2.fromOffset(4, 4)
-					subButton.Outline.BorderSizePixel = 0
-					subButton.Outline.BackgroundColor3 = window.theme.outlinecolor
-					subButton.Outline.Position = UDim2.fromOffset(-2, -2)
-					updateevent.Event:Connect(function(theme)
-						subButton.Outline.BackgroundColor3 = theme.outlinecolor
-					end)
-
-					subButton.BlackOutline = Instance.new("Frame", subButton.Main)
-					subButton.BlackOutline.Name = "blackline"
-					subButton.BlackOutline.ZIndex = 6
-					subButton.BlackOutline.Size = subButton.Main.Size + UDim2.fromOffset(2, 2)
-					subButton.BlackOutline.BorderSizePixel = 0
-					subButton.BlackOutline.BackgroundColor3 = window.theme.outlinecolor2
-					subButton.BlackOutline.Position = UDim2.fromOffset(-1, -1)
-					updateevent.Event:Connect(function(theme)
-						subButton.BlackOutline.BackgroundColor3 = theme.outlinecolor2
-					end)
-
-					subButton.Label = Instance.new("TextLabel", subButton.Main)
-					subButton.Label.Name = "Label"
-					subButton.Label.BackgroundTransparency = 1
-					subButton.Label.Position = UDim2.new(0, -1, 0, 0)
-					subButton.Label.ZIndex = 7
-					subButton.Label.Size = subButton.Main.Size
-					subButton.Label.Font = window.theme.font
-					subButton.Label.Text = subButton.text
-					subButton.Label.TextColor3 = window.theme.itemscolor2
-					subButton.Label.TextSize = 15
-					subButton.Label.TextStrokeTransparency = 1
-					subButton.Label.TextXAlignment = Enum.TextXAlignment.Center
-					subButton.Main.MouseButton1Down:Connect(subButton.callback)
-					updateevent.Event:Connect(function(theme)
-						subButton.Label.Font = theme.font
-						subButton.Label.TextColor3 = theme.itemscolor
-					end)
-
-					subButton.BlackOutline2.MouseEnter:Connect(function()
-						subButton.BlackOutline2.BackgroundColor3 = window.theme.accentcolor
-					end)
-
-					subButton.BlackOutline2.MouseLeave:Connect(function()
-						subButton.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
-					end)
-
-					table.insert(self.SubButtons, subButton)
-
-					return subButton
-				end
-
-				-- Сохраняем кнопку в таблице сектора
-				if not self.Buttons then
-					self.Buttons = {}
-				end
-				table.insert(self.Buttons, button)
-
-				self:FixSize()
+				sector:FixSize()
 
 				return button
-			end
-
-			-- Функция FixSize остается прежней
-			function sector:FixSize()
-				local totalHeight = 10 -- Базовые отступы
-
-				if self.Buttons and #self.Buttons > 0 then
-					-- Находим максимальную Y-позицию среди всех кнопок
-					local maxY = 0
-					for _, btn in ipairs(self.Buttons) do
-						local buttonBottom = btn.Main.Position.Y.Offset + btn.Main.Size.Y.Offset
-						if buttonBottom > maxY then
-							maxY = buttonBottom
-						end
-					end
-					totalHeight = totalHeight + maxY + 5 -- Добавляем отступ снизу
-				end
-
-				self.Main.Size = UDim2.new(1, 0, 0, totalHeight)
-				self.Items.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 			end
 
 			function sector:AddLabel(text)
