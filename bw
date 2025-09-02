@@ -241,16 +241,6 @@ function library:CreateWindow(name, size, hidebutton)
 	window.ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 		window.TabScrollingFrame.CanvasSize = UDim2.new(0, window.ListLayout.AbsoluteContentSize.X, 0, 0)
 	end)
-	
-	-- Обновление позиции линии при прокрутке
-	window.TabScrollingFrame:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
-		for i, tab in ipairs(window.Tabs) do
-			if tab.TabButton.Name == "SelectedTab" then
-				tab:SelectTab() -- Пересчитываем позицию для активной вкладки
-				break
-			end
-		end
-	end)
 
 	window.TabList.InputBegan:Connect(dragstart)
 	window.TabList.InputChanged:Connect(dragend)
@@ -389,24 +379,7 @@ function library:CreateWindow(name, size, hidebutton)
 			tab.TabButton.Name = "SelectedTab"
 			tab.Right.Visible = true
 			tab.Left.Visible = true
-
-			-- ИСПРАВЛЕНИЕ: Правильный расчет позиции с учетом прокрутки
-			local tabButtonPosition = tab.TabButton.AbsolutePosition.X
-			local framePosition = window.Frame.AbsolutePosition.X
-			local scrollerPosition = window.TabScrollingFrame.AbsolutePosition.X
-			local scrollOffset = window.TabScrollingFrame.CanvasPosition.X
-
-			-- Позиция кнопки относительно ScrollingFrame
-			local relativePosition = (tabButtonPosition - scrollerPosition) + scrollOffset
-
-			window.Line:TweenSizeAndPosition(
-				UDim2.fromOffset(tab.TabButton.AbsoluteSize.X, 1), 
-				UDim2.new(0, relativePosition, 0, 0) + (window.BlackLine.Position - UDim2.fromOffset(0, 1)), 
-				Enum.EasingDirection.In, 
-				Enum.EasingStyle.Sine, 
-				0.15
-			)
-
+			window.Line:TweenSizeAndPosition(UDim2.fromOffset(size.X + 15, 1), UDim2.new(0, (tab.TabButton.AbsolutePosition.X - window.Frame.AbsolutePosition.X), 0, 0) + (window.BlackLine.Position - UDim2.fromOffset(0, 1)), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15)
 			task.wait(0.2)
 			block = false
 		end
