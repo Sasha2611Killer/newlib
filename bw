@@ -3473,19 +3473,18 @@ function library:CreateWindow(name, size, hidebutton)
 					-- Подготавливаем данные для сохранения
 					local configData = {}
 
-					-- Проходим по всем элементам библиотеки через pairs
-					for _, item in pairs(library.items) do
-						if item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" and library.flags[item.flag] ~= nil then
-							local value = library.flags[item.flag]
-
+					-- Сохраняем все флаги из библиотеки
+					for flagName, value in pairs(library.flags) do
+						-- Пропускаем служебные поля конфиг системы
+						if flagName ~= "Configs" and flagName ~= "ConfigName" and value ~= nil then
 							if typeof(value) == "Color3" then
-								configData[item.flag] = {value.R, value.G, value.B}
+								configData[flagName] = {value.R, value.G, value.B}
 							elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
-								configData[item.flag] = value.Name
+								configData[flagName] = value.Name
 							elseif typeof(value) == "table" then
-								configData[item.flag] = value
+								configData[flagName] = value
 							else
-								configData[item.flag] = tostring(value)
+								configData[flagName] = tostring(value)
 							end
 						end
 					end
@@ -3505,6 +3504,8 @@ function library:CreateWindow(name, size, hidebutton)
 					refreshConfigs()
 					config:Set(name)
 					configname:Set("") -- Очищаем поле ввода
+
+					print("Config saved with flags:", configData) -- Добавьте это для отладки
 				end
 			end)
 
@@ -3528,34 +3529,48 @@ function library:CreateWindow(name, size, hidebutton)
 					-- Применяем настройки из конфига
 					for flagName, savedValue in pairs(configData) do
 						if flagName ~= "Configs" and flagName ~= "ConfigName" then
-							-- Ищем элемент с таким флагом
-							for _, item in pairs(library.items) do
-								if item.flag == flagName then
-									local targetValue = savedValue
+							local targetValue = savedValue
+							local currentValue = library.flags[flagName]
 
-									-- Преобразование типов данных
-									if item.Type == "Colorpicker" and type(savedValue) == "table" then
-										targetValue = Color3.new(savedValue[1], savedValue[2], savedValue[3])
-									elseif item.Type == "Keybind" and type(savedValue) == "string" then
-										if savedValue == "None" then
-											targetValue = Enum.KeyCode.Unknown
-										else
-											local success, keyCode = pcall(function()
-												return Enum.KeyCode[savedValue]
-											end)
-											targetValue = success and keyCode or Enum.KeyCode.Unknown
-										end
-									elseif item.Type == "Slider" and type(savedValue) == "string" then
-										targetValue = tonumber(savedValue) or targetValue
-									elseif item.Type == "Toggle" and type(savedValue) == "string" then
-										targetValue = (savedValue:lower() == "true")
+							-- Определяем тип ожидаемого значения
+							if currentValue ~= nil then
+								local expectedType = typeof(currentValue)
+
+								-- Обработка Color3
+								if expectedType == "Color3" and type(savedValue) == "table" then
+									targetValue = Color3.new(savedValue[1], savedValue[2], savedValue[3])
+
+									-- Обработка KeyCode
+								elseif expectedType == "EnumItem" and currentValue.EnumType == Enum.KeyCode then
+									if savedValue == "None" then
+										targetValue = Enum.KeyCode.Unknown
+									else
+										local success, keyCode = pcall(function()
+											return Enum.KeyCode[savedValue]
+										end)
+										targetValue = success and keyCode or Enum.KeyCode.Unknown
 									end
 
-									-- Устанавливаем значение
-									pcall(function()
-										item:Set(targetValue)
-									end)
-									break
+									-- Обработка чисел
+								elseif expectedType == "number" and type(savedValue) == "string" then
+									targetValue = tonumber(savedValue) or targetValue
+
+									-- Обработка булевых значений
+								elseif expectedType == "boolean" and type(savedValue) == "string" then
+									targetValue = (savedValue:lower() == "true")
+								end
+
+								-- Устанавливаем значение флага
+								library.flags[flagName] = targetValue
+
+								-- Обновляем UI элементы
+								for _, item in pairs(library.items) do
+									if item.flag == flagName and item.Set then
+										pcall(function()
+											item:Set(targetValue)
+										end)
+										break
+									end
 								end
 							end
 						end
