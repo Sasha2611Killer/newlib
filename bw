@@ -3441,7 +3441,7 @@ function library:CreateWindow(name, size, hidebutton)
 				return configsystem.configFolder .. "\\" .. filename .. "." .. customExtension
 			end
 
-			-- Функция обновления списка конфигов
+			-- Функция обновления списка конфигов (ИСПРАВЛЕННАЯ)
 			local function refreshConfigs()
 				-- Очищаем текущий список
 				for i = #config.items, 1, -1 do
@@ -3456,17 +3456,27 @@ function library:CreateWindow(name, size, hidebutton)
 					return listfiles(configsystem.configFolder)
 				end)
 
-				if not success or not files then return end
+				if not success or not files then 
+					warn("Failed to list files in folder:", configsystem.configFolder)
+					return 
+				end
 
 				-- Добавляем все найденные конфиги
 				for _, file in ipairs(files) do
-					local extension = file:match(".+%.(.+)$")
-					if extension and extension:lower() == customExtension then
+					-- Простая проверка на расширение
+					if file:sub(-#customExtension - 1):lower() == "." .. customExtension then
+						-- Извлекаем имя файла без пути и расширения
 						local filename = file:match(".+\\(.+)%." .. customExtension .. "$")
-						if filename then
+						if filename and filename ~= "" then
 							config:Add(filename)
 						end
 					end
+				end
+
+				-- Альтернативный метод отладки (можно удалить после проверки)
+				print("Found config files in", configsystem.configFolder)
+				for _, file in ipairs(files) do
+					print("File:", file)
 				end
 			end
 
@@ -3477,7 +3487,7 @@ function library:CreateWindow(name, size, hidebutton)
 			configsystem.Create = configsystem.sector:AddButton("Create", function()
 				local name = configname:Get()
 				if name and name ~= "" and name ~= "Select Config" then
-					-- Подготавливаем данные для сохранения (исключаем служебные поля)
+					-- Подготавливаем данные для сохранения
 					local configData = {}
 					for flag, value in pairs(library.flags) do
 						if flag ~= "Configs" and flag ~= "ConfigName" and value ~= nil then
@@ -3547,7 +3557,7 @@ function library:CreateWindow(name, size, hidebutton)
 							elseif value == "false" then
 								targetValue = false
 
-								-- Обработка KeyCode (биндов)
+								-- Обработка KeyCode
 							elseif (flag:lower():find("key") or flag:lower():find("bind")) then
 								if value == "None" or value == "" then
 									targetValue = "None"
@@ -3566,7 +3576,7 @@ function library:CreateWindow(name, size, hidebutton)
 							for _, item in pairs(library.items) do
 								if item.flag == flag and item.Set then
 									pcall(function()
-										if item.SlideBar then -- Если это слайдер
+										if item.SlideBar then
 											item:Set(tonumber(targetValue) or targetValue)
 										else
 											item:Set(targetValue)
@@ -3586,7 +3596,6 @@ function library:CreateWindow(name, size, hidebutton)
 					local configData = {}
 					for flag, value in pairs(library.flags) do
 						if flag ~= "Configs" and flag ~= "ConfigName" and value ~= nil then
-							-- Обработка разных типов данных
 							if typeof(value) == "Color3" then
 								configData[flag] = {value.R, value.G, value.B}
 							elseif typeof(value) == "EnumItem" then
