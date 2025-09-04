@@ -3472,26 +3472,35 @@ function library:CreateWindow(name, size, hidebutton)
 				if name and name ~= "" and name ~= "Select Config" then
 					local configData = {}
 
-					-- Сохраняем все элементы по их уникальным флагам
+					-- Проходим по всем элементам UI и сохраняем по ИМЕНАМ ФЛАГОВ
 					for _, item in pairs(library.items) do
 						if item and item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" then
 							local value = library.flags[item.flag]
 
-							if typeof(value) == "Color3" then
-								configData[item.flag] = {value.R, value.G, value.B}
-							elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
-								configData[item.flag] = value.Name
-							elseif typeof(value) == "table" then
-								configData[item.flag] = value
-							else
-								configData[item.flag] = tostring(value)
+							if value ~= nil then
+								if typeof(value) == "Color3" then
+									configData[item.flag] = {value.R, value.G, value.B}
+								elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
+									configData[item.flag] = value.Name
+								elseif typeof(value) == "table" then
+									configData[item.flag] = value
+								else
+									configData[item.flag] = tostring(value)
+								end
 							end
 						end
 					end
 
 					-- Сохраняем в файл
 					local filePath = configsystem.configFolder .. "\\" .. name .. ".txt"
-					writefile(filePath, http:JSONEncode(configData))
+					local success, err = pcall(function()
+						writefile(filePath, http:JSONEncode(configData))
+					end)
+
+					if not success then
+						warn("Failed to create config:", err)
+						return
+					end
 
 					refreshConfigs()
 					config:Set(name)
@@ -3516,51 +3525,42 @@ function library:CreateWindow(name, size, hidebutton)
 						return
 					end
 
-					-- Применяем настройки из конфига
+					-- Применяем настройки по ИМЕНАМ ФЛАГОВ
 					for flagName, savedValue in pairs(configData) do
 						if flagName ~= "Configs" and flagName ~= "ConfigName" then
-							local targetValue = savedValue
-							local currentValue = library.flags[flagName]
+							-- Ищем элемент с таким флагом
+							for _, item in pairs(library.items) do
+								if item.flag == flagName and item.Set then
+									local targetValue = savedValue
+									local currentValue = library.flags[flagName]
 
-							-- Определяем тип ожидаемого значения
-							if currentValue ~= nil then
-								local expectedType = typeof(currentValue)
+									-- Преобразование типов данных
+									if currentValue ~= nil then
+										local expectedType = typeof(currentValue)
 
-								-- Обработка Color3
-								if expectedType == "Color3" and type(savedValue) == "table" then
-									targetValue = Color3.new(savedValue[1], savedValue[2], savedValue[3])
+										if expectedType == "Color3" and type(savedValue) == "table" then
+											targetValue = Color3.new(savedValue[1], savedValue[2], savedValue[3])
+										elseif expectedType == "EnumItem" and currentValue.EnumType == Enum.KeyCode then
+											if savedValue == "None" then
+												targetValue = Enum.KeyCode.Unknown
+											else
+												local success, keyCode = pcall(function()
+													return Enum.KeyCode[savedValue]
+												end)
+												targetValue = success and keyCode or Enum.KeyCode.Unknown
+											end
+										elseif expectedType == "number" and type(savedValue) == "string" then
+											targetValue = tonumber(savedValue) or targetValue
+										elseif expectedType == "boolean" and type(savedValue) == "string" then
+											targetValue = (savedValue:lower() == "true")
+										end
 
-									-- Обработка KeyCode
-								elseif expectedType == "EnumItem" and currentValue.EnumType == Enum.KeyCode then
-									if savedValue == "None" then
-										targetValue = Enum.KeyCode.Unknown
-									else
-										local success, keyCode = pcall(function()
-											return Enum.KeyCode[savedValue]
-										end)
-										targetValue = success and keyCode or Enum.KeyCode.Unknown
-									end
-
-									-- Обработка чисел
-								elseif expectedType == "number" and type(savedValue) == "string" then
-									targetValue = tonumber(savedValue) or targetValue
-
-									-- Обработка булевых значений
-								elseif expectedType == "boolean" and type(savedValue) == "string" then
-									targetValue = (savedValue:lower() == "true")
-								end
-
-								-- Устанавливаем значение флага
-								library.flags[flagName] = targetValue
-
-								-- Обновляем UI элементы
-								for _, item in pairs(library.items) do
-									if item.flag == flagName and item.Set then
+										-- Устанавливаем значение
 										pcall(function()
 											item:Set(targetValue)
 										end)
-										break
 									end
+									break
 								end
 							end
 						end
