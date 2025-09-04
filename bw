@@ -3412,20 +3412,16 @@ function library:CreateWindow(name, size, hidebutton)
 		function tab:CreateConfigSystem(name, side)
 			local configsystem = {}
 			local http = game:GetService("HttpService")
-			local customExtension = "sasha2611"  -- Ваше кастомное расширение
+			local customExtension = "sasha2611"
 
-			-- Создаем папку для конфигов с правильным путем
+			-- Создаем папку для конфигов
 			configsystem.configFolder = window.name .. "\\" .. game.PlaceId
 			if not isfolder(configsystem.configFolder) then
 				makefolder(configsystem.configFolder)
 			end
 
 			configsystem.sector = tab:CreateSector(name or "Config System", side or "left")
-
-			-- Текстовое поле для имени конфига
 			local configname = configsystem.sector:AddTextbox("Config Name", "", function() end, "ConfigName")
-
-			-- Выпадающий список конфигов
 			local config = configsystem.sector:AddDropdown("Configs", {"Select Config"}, "Select Config", false, function() end, "Configs")
 
 			-- Функция для безопасного чтения файла
@@ -3436,74 +3432,64 @@ function library:CreateWindow(name, size, hidebutton)
 				return http:JSONDecode(content)
 			end
 
-			-- Функция получения полного пути к файлу
 			local function getConfigPath(filename)
 				return configsystem.configFolder .. "\\" .. filename .. "." .. customExtension
 			end
 
-			-- Функция обновления списка конфигов (ИСПРАВЛЕННАЯ)
+			-- Функция обновления списка конфигов
 			local function refreshConfigs()
-				-- Очищаем текущий список
 				for i = #config.items, 1, -1 do
 					config:Remove(config.items[i])
 				end
-
-				-- Добавляем дефолтный вариант
 				config:Add("Select Config")
 
-				-- Получаем все файлы конфигов
 				local success, files = pcall(function()
 					return listfiles(configsystem.configFolder)
 				end)
 
-				if not success or not files then 
-					warn("Failed to list files in folder:", configsystem.configFolder)
-					return 
-				end
+				if not success or not files then return end
 
-				-- Добавляем все найденные конфиги
 				for _, file in ipairs(files) do
-					-- Простая проверка на расширение
 					if file:sub(-#customExtension - 1):lower() == "." .. customExtension then
-						-- Извлекаем имя файла без пути и расширения
 						local filename = file:match(".+\\(.+)%." .. customExtension .. "$")
 						if filename and filename ~= "" then
 							config:Add(filename)
 						end
 					end
 				end
-
-				-- Альтернативный метод отладки (можно удалить после проверки)
-				print("Found config files in", configsystem.configFolder)
-				for _, file in ipairs(files) do
-					print("File:", file)
-				end
 			end
 
 			-- Первоначальное обновление списка
 			refreshConfigs()
 
-			-- Кнопка создания конфига
+			-- Кнопка создания конфига (ИСПРАВЛЕННАЯ)
 			configsystem.Create = configsystem.sector:AddButton("Create", function()
 				local name = configname:Get()
 				if name and name ~= "" and name ~= "Select Config" then
-					-- Подготавливаем данные для сохранения
 					local configData = {}
-					for flag, value in pairs(library.flags) do
-						if flag ~= "Configs" and flag ~= "ConfigName" and value ~= nil then
-							if typeof(value) == "Color3" then
-								configData[flag] = {value.R, value.G, value.B}
-							elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
-								configData[flag] = value.Name
-							elseif typeof(value) == "table" then
-								configData[flag] = value
-							else
-								configData[flag] = tostring(value)
+
+					-- Собираем данные из всех элементов библиотеки
+					for _, item in pairs(library.items) do
+						if item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" then
+							local value = library.flags[item.flag]
+							if value ~= nil then
+								-- Используем текст элемента как ключ вместо флага
+								local elementName = item.text or item.flag
+
+								if typeof(value) == "Color3" then
+									configData[elementName] = {value.R, value.G, value.B}
+								elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
+									configData[elementName] = value.Name
+								elseif typeof(value) == "table" then
+									configData[elementName] = value
+								else
+									configData[elementName] = tostring(value)
+								end
 							end
 						end
 					end
 
-					-- Сохраняем в файл с кастомным расширением
+					-- Сохраняем в файл
 					local filePath = getConfigPath(name)
 					local success, err = pcall(function()
 						writefile(filePath, http:JSONEncode(configData))
@@ -3514,14 +3500,13 @@ function library:CreateWindow(name, size, hidebutton)
 						return
 					end
 
-					-- Обновляем список и выбираем новый конфиг
 					refreshConfigs()
 					config:Set(name)
-					configname:Set("") -- Очищаем поле ввода
+					configname:Set("")
 				end
 			end)
 
-			-- Кнопка загрузки конфига
+			-- Кнопка загрузки конфига (ИСПРАВЛЕННАЯ)
 			configsystem.Load = configsystem.sector:AddButton("Load", function()
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
@@ -3538,85 +3523,83 @@ function library:CreateWindow(name, size, hidebutton)
 						return
 					end
 
-					-- Применяем настройки из конфига
-					for flag, value in pairs(configData) do
-						if flag ~= "Configs" and flag ~= "ConfigName" and library.flags[flag] ~= nil then
-							local targetValue = value
+					-- Применяем настройки используя текст элементов
+					for _, item in pairs(library.items) do
+						if item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" then
+							local elementName = item.text or item.flag
+							if configData[elementName] ~= nil then
+								local value = configData[elementName]
+								local targetValue = value
 
-							-- Обработка Color3
-							if type(value) == "table" and #value == 3 then
-								targetValue = Color3.new(value[1], value[2], value[3])
-
-								-- Обработка чисел
-							elseif tonumber(value) then
-								targetValue = tonumber(value)
-
-								-- Обработка булевых значений
-							elseif value == "true" then
-								targetValue = true
-							elseif value == "false" then
-								targetValue = false
-
-								-- Обработка KeyCode
-							elseif (flag:lower():find("key") or flag:lower():find("bind")) then
-								if value == "None" or value == "" then
-									targetValue = "None"
-								else
-									local success, keyCode = pcall(function()
-										return Enum.KeyCode[value]
-									end)
-									targetValue = success and keyCode or "None"
+								-- Обработка разных типов данных
+								if type(value) == "table" and #value == 3 then
+									targetValue = Color3.new(value[1], value[2], value[3])
+								elseif tonumber(value) then
+									targetValue = tonumber(value)
+								elseif value == "true" then
+									targetValue = true
+								elseif value == "false" then
+									targetValue = false
+								elseif (item.flag:lower():find("key") or item.flag:lower():find("bind")) then
+									if value == "None" or value == "" then
+										targetValue = "None"
+									else
+										local success, keyCode = pcall(function()
+											return Enum.KeyCode[value]
+										end)
+										targetValue = success and keyCode or "None"
+									end
 								end
-							end
 
-							-- Устанавливаем значение флага
-							library.flags[flag] = targetValue
-
-							-- Обновляем UI элементы
-							for _, item in pairs(library.items) do
-								if item.flag == flag and item.Set then
-									pcall(function()
+								-- Устанавливаем значение
+								pcall(function()
+									if item.Set then
 										if item.SlideBar then
 											item:Set(tonumber(targetValue) or targetValue)
 										else
 											item:Set(targetValue)
 										end
-									end)
-								end
+									end
+								end)
 							end
 						end
 					end
 				end
 			end)
 
+			-- Кнопка сохранения конфига (ИСПРАВЛЕННАЯ)
 			configsystem.Save = configsystem.sector:AddButton("Save", function()
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
-					-- Подготавливаем данные для сохранения
 					local configData = {}
-					for flag, value in pairs(library.flags) do
-						if flag ~= "Configs" and flag ~= "ConfigName" and value ~= nil then
-							if typeof(value) == "Color3" then
-								configData[flag] = {value.R, value.G, value.B}
-							elseif typeof(value) == "EnumItem" then
-								if value.EnumType == Enum.KeyCode then
-									configData[flag] = value.Name
+
+					for _, item in pairs(library.items) do
+						if item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" then
+							local value = library.flags[item.flag]
+							if value ~= nil then
+								local elementName = item.text or item.flag
+
+								if typeof(value) == "Color3" then
+									configData[elementName] = {value.R, value.G, value.B}
+								elseif typeof(value) == "EnumItem" then
+									if value.EnumType == Enum.KeyCode then
+										configData[elementName] = value.Name
+									else
+										configData[elementName] = tostring(value)
+									end
+								elseif typeof(value) == "table" then
+									configData[elementName] = value
 								else
-									configData[flag] = tostring(value)
-								end
-							elseif typeof(value) == "table" then
-								configData[flag] = value
-							else
-								if type(value) == "number" then
-									configData[flag] = value
-								else
-									configData[flag] = tostring(value)
+									if type(value) == "number" then
+										configData[elementName] = value
+									else
+										configData[elementName] = tostring(value)
+									end
 								end
 							end
 						end
 					end
 
-					-- Сохраняем в файл с кастомным расширением
 					local success, err = pcall(function()
 						writefile(getConfigPath(selected), http:JSONEncode(configData))
 					end)
@@ -3643,7 +3626,6 @@ function library:CreateWindow(name, size, hidebutton)
 						return
 					end
 
-					-- Обновляем список и сбрасываем выбор
 					refreshConfigs()
 					config:Set("Select Config")
 				end
