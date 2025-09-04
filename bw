@@ -3466,14 +3466,42 @@ function library:CreateWindow(name, size, hidebutton)
 			-- Первоначальное обновление списка
 			refreshConfigs()
 
+			-- Функция для проверки, нужно ли сохранять элемент
+			local function shouldSaveItem(item)
+				-- Не сохраняем системные элементы конфигов
+				if item.flag == "Configs" or item.flag == "ConfigName" then
+					return false
+				end
+
+				-- Не сохраняем текстовые поля (кроме тех, которые действительно нужны)
+				if item.Type == "Textbox" and not item.flag:find("prediction") and not item.flag:find("amount") then
+					return false
+				end
+
+				-- Не сохраняем временные элементы
+				if item.flag:find("dropdown") or item.flag:find("player") or item.flag:find("method") then
+					return false
+				end
+
+				-- Сохраняем только основные элементы управления
+				local validTypes = {"Toggle", "Slider", "Keybind", "Colorpicker", "Dropdown"}
+				for _, validType in ipairs(validTypes) do
+					if item.Type == validType then
+						return true
+					end
+				end
+
+				return false
+			end
+
 			-- Кнопка создания конфига
 			configsystem.Create = configsystem.sector:AddButton("Create", function()
 				local name = configname:Get()
 				if name and name ~= "" and name ~= "Select Config" then
-					-- Подготавливаем данные для сохранения (сохраняем по флагам, а не по именам)
+					-- Подготавливаем данные для сохранения (только нужные элементы)
 					local configData = {}
 					for _, item in pairs(library.items) do
-						if item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" then
+						if item.flag and shouldSaveItem(item) then
 							local value = library.flags[item.flag]
 							if value ~= nil then
 								if typeof(value) == "Color3" then
@@ -3481,7 +3509,10 @@ function library:CreateWindow(name, size, hidebutton)
 								elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
 									configData[item.flag] = value.Name
 								elseif typeof(value) == "table" then
-									configData[item.flag] = value
+									-- Сохраняем только реальные таблицы (не временные данные)
+									if #value > 0 or next(value) then
+										configData[item.flag] = value
+									end
 								else
 									configData[item.flag] = tostring(value)
 								end
@@ -3579,7 +3610,7 @@ function library:CreateWindow(name, size, hidebutton)
 					-- Подготавливаем данные для сохранения по флагам
 					local configData = {}
 					for _, item in pairs(library.items) do
-						if item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" then
+						if item.flag and shouldSaveItem(item) then
 							local value = library.flags[item.flag]
 							if value ~= nil then
 								if typeof(value) == "Color3" then
@@ -3591,7 +3622,10 @@ function library:CreateWindow(name, size, hidebutton)
 										configData[item.flag] = tostring(value)
 									end
 								elseif typeof(value) == "table" then
-									configData[item.flag] = value
+									-- Сохраняем только реальные таблицы
+									if #value > 0 or next(value) then
+										configData[item.flag] = value
+									end
 								else
 									if type(value) == "number" then
 										configData[item.flag] = value
