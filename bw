@@ -3455,7 +3455,7 @@ function library:CreateWindow(name, size, hidebutton)
 				-- Добавляем все найденные конфиги
 				for _, file in ipairs(files) do
 					if file:sub(-4):lower() == ".txt" then
-						local filename = file:match(".+\\(.+).txt$") or file:match("(.+).txt$")
+						local filename = file:match(".+\\(.+).Sasha2611$") or file:match("(.+).Sasha2611$")
 						if filename then
 							config:Add(filename)
 						end
@@ -3466,62 +3466,28 @@ function library:CreateWindow(name, size, hidebutton)
 			-- Первоначальное обновление списка
 			refreshConfigs()
 
-			-- Функция для проверки, нужно ли сохранять элемент
-			local function shouldSaveItem(item)
-				-- Не сохраняем системные элементы конфигов
-				if item.flag == "Configs" or item.flag == "ConfigName" then
-					return false
-				end
-
-				-- Не сохраняем текстовые поля (кроме тех, которые действительно нужны)
-				if item.Type == "Textbox" and not item.flag:find("prediction") and not item.flag:find("amount") then
-					return false
-				end
-
-				-- Не сохраняем временные элементы
-				if item.flag:find("dropdown") or item.flag:find("player") or item.flag:find("method") then
-					return false
-				end
-
-				-- Сохраняем только основные элементы управления
-				local validTypes = {"Toggle", "Slider", "Keybind", "Colorpicker", "Dropdown"}
-				for _, validType in ipairs(validTypes) do
-					if item.Type == validType then
-						return true
-					end
-				end
-
-				return false
-			end
-
 			-- Кнопка создания конфига
 			configsystem.Create = configsystem.sector:AddButton("Create", function()
 				local name = configname:Get()
 				if name and name ~= "" and name ~= "Select Config" then
-					-- Подготавливаем данные для сохранения (только нужные элементы)
+					-- Подготавливаем данные для сохранения (исключаем служебные поля)
 					local configData = {}
-					for _, item in pairs(library.items) do
-						if item.flag and shouldSaveItem(item) then
-							local value = library.flags[item.flag]
-							if value ~= nil then
-								if typeof(value) == "Color3" then
-									configData[item.flag] = {value.R, value.G, value.B}
-								elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
-									configData[item.flag] = value.Name
-								elseif typeof(value) == "table" then
-									-- Сохраняем только реальные таблицы (не временные данные)
-									if #value > 0 or next(value) then
-										configData[item.flag] = value
-									end
-								else
-									configData[item.flag] = tostring(value)
-								end
+					for flag, value in pairs(library.flags) do
+						if flag ~= "Configs" and flag ~= "ConfigName" and value ~= nil then
+							if typeof(value) == "Color3" then
+								configData[flag] = {value.R, value.G, value.B}
+							elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
+								configData[flag] = value.Name
+							elseif typeof(value) == "table" then
+								configData[flag] = value
+							else
+								configData[flag] = tostring(value)
 							end
 						end
 					end
 
 					-- Сохраняем в файл
-					local filePath = configsystem.configFolder .. "\\" .. name .. ".txt"
+					local filePath = configsystem.configFolder .. "\\" .. name .. ".Sasha2611"
 					local success, err = pcall(function()
 						writefile(filePath, http:JSONEncode(configData))
 					end)
@@ -3538,11 +3504,11 @@ function library:CreateWindow(name, size, hidebutton)
 				end
 			end)
 
-			-- Кнопка загрузки конфига
+			-- Кнопка загрузки конфига (исправленная версия)
 			configsystem.Load = configsystem.sector:AddButton("Load", function()
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
-					local filePath = configsystem.configFolder .. "\\" .. selected .. ".txt"
+					local filePath = configsystem.configFolder .. "\\" .. selected .. ".Sasha2611"
 
 					if not isfile(filePath) then
 						warn("Config file not found:", filePath)
@@ -3555,27 +3521,31 @@ function library:CreateWindow(name, size, hidebutton)
 						return
 					end
 
-					-- Применяем настройки из конфига по флагам
+					-- Применяем настройки из конфига
 					for flag, value in pairs(configData) do
-						if library.flags[flag] ~= nil then
+						if flag ~= "Configs" and flag ~= "ConfigName" and library.flags[flag] ~= nil then
 							local targetValue = value
 
 							-- Обработка Color3
 							if type(value) == "table" and #value == 3 then
 								targetValue = Color3.new(value[1], value[2], value[3])
+
 								-- Обработка чисел
 							elseif tonumber(value) then
 								targetValue = tonumber(value)
+
 								-- Обработка булевых значений
 							elseif value == "true" then
 								targetValue = true
 							elseif value == "false" then
 								targetValue = false
-								-- Обработка KeyCode
+
+								-- Обработка KeyCode (биндов)
 							elseif (flag:lower():find("key") or flag:lower():find("bind")) then
 								if value == "None" or value == "" then
-									targetValue = "None"
+									targetValue = "None" -- или nil, если ваша библиотека поддерживает
 								else
+									-- Проверяем, существует ли такой KeyCode
 									local success, keyCode = pcall(function()
 										return Enum.KeyCode[value]
 									end)
@@ -3586,7 +3556,7 @@ function library:CreateWindow(name, size, hidebutton)
 							-- Устанавливаем значение флага
 							library.flags[flag] = targetValue
 
-							-- Обновляем соответствующий UI элемент
+							-- Обновляем UI элементы
 							for _, item in pairs(library.items) do
 								if item.flag == flag and item.Set then
 									pcall(function()
@@ -3596,7 +3566,6 @@ function library:CreateWindow(name, size, hidebutton)
 											item:Set(targetValue)
 										end
 									end)
-									break -- Нашли нужный элемент, выходим из цикла
 								end
 							end
 						end
@@ -3607,31 +3576,27 @@ function library:CreateWindow(name, size, hidebutton)
 			configsystem.Save = configsystem.sector:AddButton("Save", function()
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
-					-- Подготавливаем данные для сохранения по флагам
+					-- Подготавливаем данные для сохранения
 					local configData = {}
-					for _, item in pairs(library.items) do
-						if item.flag and shouldSaveItem(item) then
-							local value = library.flags[item.flag]
-							if value ~= nil then
-								if typeof(value) == "Color3" then
-									configData[item.flag] = {value.R, value.G, value.B}
-								elseif typeof(value) == "EnumItem" then
-									if value.EnumType == Enum.KeyCode then
-										configData[item.flag] = value.Name
-									else
-										configData[item.flag] = tostring(value)
-									end
-								elseif typeof(value) == "table" then
-									-- Сохраняем только реальные таблицы
-									if #value > 0 or next(value) then
-										configData[item.flag] = value
-									end
+					for flag, value in pairs(library.flags) do
+						if flag ~= "Configs" and flag ~= "ConfigName" and value ~= nil then
+							-- Обработка разных типов данных
+							if typeof(value) == "Color3" then
+								configData[flag] = {value.R, value.G, value.B}
+							elseif typeof(value) == "EnumItem" then
+								if value.EnumType == Enum.KeyCode then
+									configData[flag] = value.Name
 								else
-									if type(value) == "number" then
-										configData[item.flag] = value
-									else
-										configData[item.flag] = tostring(value)
-									end
+									configData[flag] = tostring(value)
+								end
+							elseif typeof(value) == "table" then
+								configData[flag] = value
+							else
+								-- Для чисел сохраняем как есть, для остального - как строку
+								if type(value) == "number" then
+									configData[flag] = value
+								else
+									configData[flag] = tostring(value)
 								end
 							end
 						end
@@ -3639,7 +3604,7 @@ function library:CreateWindow(name, size, hidebutton)
 
 					-- Сохраняем в файл
 					local success, err = pcall(function()
-						writefile(configsystem.configFolder .. "\\" .. selected .. ".txt", http:JSONEncode(configData))
+						writefile(configsystem.configFolder .. "\\" .. selected .. ".Sasha2611", http:JSONEncode(configData))
 					end)
 
 					if not success then
@@ -3651,7 +3616,7 @@ function library:CreateWindow(name, size, hidebutton)
 			configsystem.Delete = configsystem.sector:AddButton("Delete", function()
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
-					local filePath = configsystem.configFolder .. "/" .. selected .. ".txt"
+					local filePath = configsystem.configFolder .. "/" .. selected .. ".Sasha2611"
 
 					local success, err = pcall(function()
 						if isfile(filePath) then
