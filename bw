@@ -3470,19 +3470,22 @@ function library:CreateWindow(name, size, hidebutton)
 			configsystem.Create = configsystem.sector:AddButton("Create", function()
 				local name = configname:Get()
 				if name and name ~= "" and name ~= "Select Config" then
-					-- Подготавливаем данные для сохранения (используем имена флагов)
+					-- Подготавливаем данные для сохранения (используем имена флагов из items)
 					local configData = {}
-					for flag, value in pairs(library.flags) do
-						-- Пропускаем служебные поля конфиг системы
-						if flag ~= "Configs" and flag ~= "ConfigName" and value ~= nil then
+
+					-- Проходим по всем элементам библиотеки и сохраняем по их флагам
+					for flagName, item in pairs(library.items) do
+						if flagName ~= "Configs" and flagName ~= "ConfigName" and library.flags[flagName] ~= nil then
+							local value = library.flags[flagName]
+
 							if typeof(value) == "Color3" then
-								configData[flag] = {value.R, value.G, value.B}
+								configData[flagName] = {value.R, value.G, value.B}
 							elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
-								configData[flag] = value.Name
+								configData[flagName] = value.Name
 							elseif typeof(value) == "table" then
-								configData[flag] = value
+								configData[flagName] = value
 							else
-								configData[flag] = tostring(value)
+								configData[flagName] = tostring(value)
 							end
 						end
 					end
@@ -3524,17 +3527,16 @@ function library:CreateWindow(name, size, hidebutton)
 
 					-- Применяем настройки из конфига по ИМЕНАМ ФЛАГОВ
 					for flagName, savedValue in pairs(configData) do
-						-- Пропускаем служебные поля
 						if flagName ~= "Configs" and flagName ~= "ConfigName" then
 							-- Находим соответствующий UI элемент по имени флага
 							local item = library.items[flagName]
-							if item and item.flag == flagName then
+							if item then
 								local targetValue = savedValue
 
 								-- Преобразование типов данных
 								if item.Type == "Colorpicker" and type(savedValue) == "table" then
 									targetValue = Color3.new(savedValue[1], savedValue[2], savedValue[3])
-								elseif (item.Type == "Keybind" or item.Type == "Dropdown") and type(savedValue) == "string" then
+								elseif item.Type == "Keybind" and type(savedValue) == "string" then
 									-- Для Keybind преобразуем строку в KeyCode
 									if savedValue == "None" then
 										targetValue = Enum.KeyCode.Unknown
@@ -3546,6 +3548,8 @@ function library:CreateWindow(name, size, hidebutton)
 									end
 								elseif item.Type == "Slider" and type(savedValue) == "string" then
 									targetValue = tonumber(savedValue) or targetValue
+								elseif item.Type == "Toggle" and type(savedValue) == "string" then
+									targetValue = (savedValue:lower() == "true")
 								end
 
 								-- Устанавливаем значение
