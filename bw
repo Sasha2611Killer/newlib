@@ -3470,42 +3470,32 @@ function library:CreateWindow(name, size, hidebutton)
 			configsystem.Create = configsystem.sector:AddButton("Create", function()
 				local name = configname:Get()
 				if name and name ~= "" and name ~= "Select Config" then
-					-- Подготавливаем данные для сохранения
 					local configData = {}
 
-					-- Сохраняем все флаги из библиотеки
-					for flagName, value in pairs(library.flags) do
-						-- Пропускаем служебные поля конфиг системы
-						if flagName ~= "Configs" and flagName ~= "ConfigName" and value ~= nil then
+					-- Сохраняем все элементы по их уникальным флагам
+					for _, item in pairs(library.items) do
+						if item and item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" then
+							local value = library.flags[item.flag]
+
 							if typeof(value) == "Color3" then
-								configData[flagName] = {value.R, value.G, value.B}
+								configData[item.flag] = {value.R, value.G, value.B}
 							elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
-								configData[flagName] = value.Name
+								configData[item.flag] = value.Name
 							elseif typeof(value) == "table" then
-								configData[flagName] = value
+								configData[item.flag] = value
 							else
-								configData[flagName] = tostring(value)
+								configData[item.flag] = tostring(value)
 							end
 						end
 					end
 
 					-- Сохраняем в файл
 					local filePath = configsystem.configFolder .. "\\" .. name .. ".txt"
-					local success, err = pcall(function()
-						writefile(filePath, http:JSONEncode(configData))
-					end)
+					writefile(filePath, http:JSONEncode(configData))
 
-					if not success then
-						warn("Failed to create config:", err)
-						return
-					end
-
-					-- Обновляем список и выбираем новый конфиг
 					refreshConfigs()
 					config:Set(name)
-					configname:Set("") -- Очищаем поле ввода
-
-					print("Config saved with flags:", configData) -- Добавьте это для отладки
+					configname:Set("")
 				end
 			end)
 
