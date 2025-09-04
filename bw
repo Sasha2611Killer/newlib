@@ -3412,6 +3412,7 @@ function library:CreateWindow(name, size, hidebutton)
 		function tab:CreateConfigSystem(name, side)
 			local configsystem = {}
 			local http = game:GetService("HttpService")
+			local customExtension = "sasha2611"  -- Ваше кастомное расширение
 
 			-- Создаем папку для конфигов с правильным путем
 			configsystem.configFolder = window.name .. "\\" .. game.PlaceId
@@ -3435,6 +3436,11 @@ function library:CreateWindow(name, size, hidebutton)
 				return http:JSONDecode(content)
 			end
 
+			-- Функция получения полного пути к файлу
+			local function getConfigPath(filename)
+				return configsystem.configFolder .. "\\" .. filename .. "." .. customExtension
+			end
+
 			-- Функция обновления списка конфигов
 			local function refreshConfigs()
 				-- Очищаем текущий список
@@ -3454,8 +3460,9 @@ function library:CreateWindow(name, size, hidebutton)
 
 				-- Добавляем все найденные конфиги
 				for _, file in ipairs(files) do
-					if file:sub(-4):lower() == ".txt" then
-						local filename = file:match(".+\\(.+).Sasha2611$") or file:match("(.+).Sasha2611$")
+					local extension = file:match(".+%.(.+)$")
+					if extension and extension:lower() == customExtension then
+						local filename = file:match(".+\\(.+)%." .. customExtension .. "$")
 						if filename then
 							config:Add(filename)
 						end
@@ -3486,8 +3493,8 @@ function library:CreateWindow(name, size, hidebutton)
 						end
 					end
 
-					-- Сохраняем в файл
-					local filePath = configsystem.configFolder .. "\\" .. name .. ".Sasha2611"
+					-- Сохраняем в файл с кастомным расширением
+					local filePath = getConfigPath(name)
 					local success, err = pcall(function()
 						writefile(filePath, http:JSONEncode(configData))
 					end)
@@ -3504,11 +3511,11 @@ function library:CreateWindow(name, size, hidebutton)
 				end
 			end)
 
-			-- Кнопка загрузки конфига (исправленная версия)
+			-- Кнопка загрузки конфига
 			configsystem.Load = configsystem.sector:AddButton("Load", function()
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
-					local filePath = configsystem.configFolder .. "\\" .. selected .. ".Sasha2611"
+					local filePath = getConfigPath(selected)
 
 					if not isfile(filePath) then
 						warn("Config file not found:", filePath)
@@ -3543,9 +3550,8 @@ function library:CreateWindow(name, size, hidebutton)
 								-- Обработка KeyCode (биндов)
 							elseif (flag:lower():find("key") or flag:lower():find("bind")) then
 								if value == "None" or value == "" then
-									targetValue = "None" -- или nil, если ваша библиотека поддерживает
+									targetValue = "None"
 								else
-									-- Проверяем, существует ли такой KeyCode
 									local success, keyCode = pcall(function()
 										return Enum.KeyCode[value]
 									end)
@@ -3592,7 +3598,6 @@ function library:CreateWindow(name, size, hidebutton)
 							elseif typeof(value) == "table" then
 								configData[flag] = value
 							else
-								-- Для чисел сохраняем как есть, для остального - как строку
 								if type(value) == "number" then
 									configData[flag] = value
 								else
@@ -3602,9 +3607,9 @@ function library:CreateWindow(name, size, hidebutton)
 						end
 					end
 
-					-- Сохраняем в файл
+					-- Сохраняем в файл с кастомным расширением
 					local success, err = pcall(function()
-						writefile(configsystem.configFolder .. "\\" .. selected .. ".Sasha2611", http:JSONEncode(configData))
+						writefile(getConfigPath(selected), http:JSONEncode(configData))
 					end)
 
 					if not success then
@@ -3616,7 +3621,7 @@ function library:CreateWindow(name, size, hidebutton)
 			configsystem.Delete = configsystem.sector:AddButton("Delete", function()
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
-					local filePath = configsystem.configFolder .. "/" .. selected .. ".Sasha2611"
+					local filePath = getConfigPath(selected)
 
 					local success, err = pcall(function()
 						if isfile(filePath) then
