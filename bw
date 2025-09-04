@@ -3414,7 +3414,6 @@ function library:CreateWindow(name, size, hidebutton)
 			local http = game:GetService("HttpService")
 			local customExtension = "sasha2611"
 
-			-- Создаем папку для конфигов
 			configsystem.configFolder = window.name .. "\\" .. game.PlaceId
 			if not isfolder(configsystem.configFolder) then
 				makefolder(configsystem.configFolder)
@@ -3424,7 +3423,6 @@ function library:CreateWindow(name, size, hidebutton)
 			local configname = configsystem.sector:AddTextbox("Config Name", "", function() end, "ConfigName")
 			local config = configsystem.sector:AddDropdown("Configs", {"Select Config"}, "Select Config", false, function() end, "Configs")
 
-			-- Функция для безопасного чтения файла
 			local function readConfigFile(path)
 				if not isfile(path) then return nil end
 				local content = readfile(path)
@@ -3443,16 +3441,13 @@ function library:CreateWindow(name, size, hidebutton)
 				end
 				config:Add("Select Config")
 
-				local success, files = pcall(function()
-					return listfiles(configsystem.configFolder)
-				end)
-
-				if not success or not files then return end
+				local success, files = pcall(listfiles, configsystem.configFolder)
+				if not success then return end
 
 				for _, file in ipairs(files) do
 					if file:sub(-#customExtension - 1):lower() == "." .. customExtension then
 						local filename = file:match(".+\\(.+)%." .. customExtension .. "$")
-						if filename and filename ~= "" then
+						if filename then
 							config:Add(filename)
 						end
 					end
@@ -3461,6 +3456,10 @@ function library:CreateWindow(name, size, hidebutton)
 
 			-- Первоначальное обновление списка
 			refreshConfigs()
+			
+			local function getItemFlag(item)
+				return item.flag or item.text or "unknown"
+			end
 
 			-- Кнопка создания конфига (ИСПРАВЛЕННАЯ - сохраняем по флагу)
 			configsystem.Create = configsystem.sector:AddButton("Create", function()
@@ -3468,33 +3467,26 @@ function library:CreateWindow(name, size, hidebutton)
 				if name and name ~= "" and name ~= "Select Config" then
 					local configData = {}
 
-					-- Собираем данные из всех элементов библиотеки
 					for _, item in pairs(library.items) do
-						if item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" then
-							local value = library.flags[item.flag]
+						local flag = getItemFlag(item)
+						if flag ~= "Configs" and flag ~= "ConfigName" then
+							local value = library.flags[flag]
 							if value ~= nil then
-								-- Используем ТЕХНИЧЕСКОЕ ИМЯ ФЛАГА вместо отображаемого текста
-								local flagName = item.flag
-
 								if typeof(value) == "Color3" then
-									configData[flagName] = {value.R, value.G, value.B}
+									configData[flag] = {value.R, value.G, value.B}
 								elseif typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
-									configData[flagName] = value.Name
+									configData[flag] = value.Name
 								elseif typeof(value) == "table" then
-									configData[flagName] = value
+									configData[flag] = value
 								else
-									configData[flagName] = tostring(value)
+									configData[flag] = tostring(value)
 								end
 							end
 						end
 					end
 
-					-- Сохраняем в файл
 					local filePath = getConfigPath(name)
-					local success, err = pcall(function()
-						writefile(filePath, http:JSONEncode(configData))
-					end)
-
+					local success, err = pcall(writefile, filePath, http:JSONEncode(configData))
 					if not success then
 						warn("Failed to create config:", err)
 						return
@@ -3511,57 +3503,48 @@ function library:CreateWindow(name, size, hidebutton)
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
 					local filePath = getConfigPath(selected)
-
-					if not isfile(filePath) then
-						warn("Config file not found:", filePath)
-						return
-					end
+					if not isfile(filePath) then return end
 
 					local configData = readConfigFile(filePath)
-					if not configData then
-						warn("Failed to parse config:", selected)
-						return
-					end
+					if not configData then return end
 
-					-- Применяем настройки используя ТЕХНИЧЕСКИЕ ИМЕНА ФЛАГОВ
-					for flagName, value in pairs(configData) do
-						if flagName ~= "Configs" and flagName ~= "ConfigName" then
-							-- Ищем элемент с таким флагом
+					for flag, value in pairs(configData) do
+						if flag ~= "Configs" and flag ~= "ConfigName" then
+							local targetValue = value
+
+							-- Преобразование типов
+							if type(value) == "table" and #value == 3 then
+								targetValue = Color3.new(value[1], value[2], value[3])
+							elseif tonumber(value) then
+								targetValue = tonumber(value)
+							elseif value == "true" then
+								targetValue = true
+							elseif value == "false" then
+								targetValue = false
+							elseif (flag:lower():find("key") or flag:lower():find("bind")) then
+								if value == "None" or value == "" then
+									targetValue = "None"
+								else
+									local success, keyCode = pcall(function()
+										return Enum.KeyCode[value]
+									end)
+									targetValue = success and keyCode or "None"
+								end
+							end
+
+							-- Устанавливаем значение в библиотеку
+							library.flags[flag] = targetValue
+
+							-- Обновляем UI элементы
 							for _, item in pairs(library.items) do
-								if item.flag == flagName then
-									local targetValue = value
-
-									-- Обработка разных типов данных
-									if type(value) == "table" and #value == 3 then
-										targetValue = Color3.new(value[1], value[2], value[3])
-									elseif tonumber(value) then
-										targetValue = tonumber(value)
-									elseif value == "true" then
-										targetValue = true
-									elseif value == "false" then
-										targetValue = false
-									elseif (flagName:lower():find("key") or flagName:lower():find("bind")) then
-										if value == "None" or value == "" then
-											targetValue = "None"
-										else
-											local success, keyCode = pcall(function()
-												return Enum.KeyCode[value]
-											end)
-											targetValue = success and keyCode or "None"
-										end
-									end
-
-									-- Устанавливаем значение
+								if getItemFlag(item) == flag and item.Set then
 									pcall(function()
-										if item.Set then
-											if item.SlideBar then
-												item:Set(tonumber(targetValue) or targetValue)
-											else
-												item:Set(targetValue)
-											end
+										if item.SlideBar then
+											item:Set(tonumber(targetValue) or targetValue)
+										else
+											item:Set(targetValue)
 										end
 									end)
-									break
 								end
 							end
 						end
