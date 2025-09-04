@@ -3503,48 +3503,58 @@ function library:CreateWindow(name, size, hidebutton)
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
 					local filePath = getConfigPath(selected)
-					if not isfile(filePath) then return end
+
+					if not isfile(filePath) then
+						warn("Config file not found:", filePath)
+						return
+					end
 
 					local configData = readConfigFile(filePath)
-					if not configData then return end
+					if not configData then
+						warn("Failed to parse config:", selected)
+						return
+					end
 
-					for flag, value in pairs(configData) do
-						if flag ~= "Configs" and flag ~= "ConfigName" then
-							local targetValue = value
-
-							-- Преобразование типов
-							if type(value) == "table" and #value == 3 then
-								targetValue = Color3.new(value[1], value[2], value[3])
-							elseif tonumber(value) then
-								targetValue = tonumber(value)
-							elseif value == "true" then
-								targetValue = true
-							elseif value == "false" then
-								targetValue = false
-							elseif (flag:lower():find("key") or flag:lower():find("bind")) then
-								if value == "None" or value == "" then
-									targetValue = "None"
-								else
-									local success, keyCode = pcall(function()
-										return Enum.KeyCode[value]
-									end)
-									targetValue = success and keyCode or "None"
-								end
-							end
-
-							-- Устанавливаем значение в библиотеку
-							library.flags[flag] = targetValue
-
-							-- Обновляем UI элементы
+					-- Применяем настройки используя ТЕХНИЧЕСКИЕ ИМЕНА ФЛАГОВ
+					for flagName, value in pairs(configData) do
+						if flagName ~= "Configs" and flagName ~= "ConfigName" then
+							-- Ищем элемент с таким флагом
 							for _, item in pairs(library.items) do
-								if getItemFlag(item) == flag and item.Set then
-									pcall(function()
-										if item.SlideBar then
-											item:Set(tonumber(targetValue) or targetValue)
+								if item.flag == flagName then
+									local targetValue = value
+
+									-- Обработка разных типов данных
+									if type(value) == "table" and #value == 3 then
+										targetValue = Color3.new(value[1], value[2], value[3])
+									elseif tonumber(value) then
+										targetValue = tonumber(value)
+									elseif value == "true" then
+										targetValue = true
+									elseif value == "false" then
+										targetValue = false
+									elseif (flagName:lower():find("key") or flagName:lower():find("bind")) then
+										-- ОСОБАЯ ОБРАБОТКА ДЛЯ KEYBINDS
+										if value == "None" or value == "" or value == nil then
+											targetValue = "None"
 										else
-											item:Set(targetValue)
+											local success, keyCode = pcall(function()
+												return Enum.KeyCode[value]
+											end)
+											targetValue = success and keyCode or "None"
+										end
+									end
+
+									-- Устанавливаем значение
+									pcall(function()
+										if item.Set then
+											if item.SlideBar then
+												item:Set(tonumber(targetValue) or targetValue)
+											else
+												item:Set(targetValue)
+											end
 										end
 									end)
+									break
 								end
 							end
 						end
