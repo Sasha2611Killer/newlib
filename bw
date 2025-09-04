@@ -3470,13 +3470,11 @@ function library:CreateWindow(name, size, hidebutton)
 			configsystem.Create = configsystem.sector:AddButton("Create", function()
 				local name = configname:Get()
 				if name and name ~= "" and name ~= "Select Config" then
+					-- Подготавливаем данные для сохранения (сохраняем по флагам, а не по именам)
 					local configData = {}
-
-					-- Проходим по всем элементам UI и сохраняем по ИМЕНАМ ФЛАГОВ
 					for _, item in pairs(library.items) do
-						if item and item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" then
+						if item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" then
 							local value = library.flags[item.flag]
-
 							if value ~= nil then
 								if typeof(value) == "Color3" then
 									configData[item.flag] = {value.R, value.G, value.B}
@@ -3502,13 +3500,14 @@ function library:CreateWindow(name, size, hidebutton)
 						return
 					end
 
+					-- Обновляем список и выбираем новый конфиг
 					refreshConfigs()
 					config:Set(name)
-					configname:Set("")
+					configname:Set("") -- Очищаем поле ввода
 				end
 			end)
 
-			-- Кнопка загрузки конфига (исправленная версия)
+			-- Кнопка загрузки конфига
 			configsystem.Load = configsystem.sector:AddButton("Load", function()
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
@@ -3525,42 +3524,48 @@ function library:CreateWindow(name, size, hidebutton)
 						return
 					end
 
-					-- Применяем настройки по ИМЕНАМ ФЛАГОВ
-					for flagName, savedValue in pairs(configData) do
-						if flagName ~= "Configs" and flagName ~= "ConfigName" then
-							-- Ищем элемент с таким флагом
+					-- Применяем настройки из конфига по флагам
+					for flag, value in pairs(configData) do
+						if library.flags[flag] ~= nil then
+							local targetValue = value
+
+							-- Обработка Color3
+							if type(value) == "table" and #value == 3 then
+								targetValue = Color3.new(value[1], value[2], value[3])
+								-- Обработка чисел
+							elseif tonumber(value) then
+								targetValue = tonumber(value)
+								-- Обработка булевых значений
+							elseif value == "true" then
+								targetValue = true
+							elseif value == "false" then
+								targetValue = false
+								-- Обработка KeyCode
+							elseif (flag:lower():find("key") or flag:lower():find("bind")) then
+								if value == "None" or value == "" then
+									targetValue = "None"
+								else
+									local success, keyCode = pcall(function()
+										return Enum.KeyCode[value]
+									end)
+									targetValue = success and keyCode or "None"
+								end
+							end
+
+							-- Устанавливаем значение флага
+							library.flags[flag] = targetValue
+
+							-- Обновляем соответствующий UI элемент
 							for _, item in pairs(library.items) do
-								if item.flag == flagName and item.Set then
-									local targetValue = savedValue
-									local currentValue = library.flags[flagName]
-
-									-- Преобразование типов данных
-									if currentValue ~= nil then
-										local expectedType = typeof(currentValue)
-
-										if expectedType == "Color3" and type(savedValue) == "table" then
-											targetValue = Color3.new(savedValue[1], savedValue[2], savedValue[3])
-										elseif expectedType == "EnumItem" and currentValue.EnumType == Enum.KeyCode then
-											if savedValue == "None" then
-												targetValue = Enum.KeyCode.Unknown
-											else
-												local success, keyCode = pcall(function()
-													return Enum.KeyCode[savedValue]
-												end)
-												targetValue = success and keyCode or Enum.KeyCode.Unknown
-											end
-										elseif expectedType == "number" and type(savedValue) == "string" then
-											targetValue = tonumber(savedValue) or targetValue
-										elseif expectedType == "boolean" and type(savedValue) == "string" then
-											targetValue = (savedValue:lower() == "true")
-										end
-
-										-- Устанавливаем значение
-										pcall(function()
+								if item.flag == flag and item.Set then
+									pcall(function()
+										if item.SlideBar then -- Если это слайдер
+											item:Set(tonumber(targetValue) or targetValue)
+										else
 											item:Set(targetValue)
-										end)
-									end
-									break
+										end
+									end)
+									break -- Нашли нужный элемент, выходим из цикла
 								end
 							end
 						end
@@ -3571,27 +3576,28 @@ function library:CreateWindow(name, size, hidebutton)
 			configsystem.Save = configsystem.sector:AddButton("Save", function()
 				local selected = config:Get()
 				if selected and selected ~= "" and selected ~= "Select Config" then
-					-- Подготавливаем данные для сохранения
+					-- Подготавливаем данные для сохранения по флагам
 					local configData = {}
-					for flag, value in pairs(library.flags) do
-						if flag ~= "Configs" and flag ~= "ConfigName" and value ~= nil then
-							-- Обработка разных типов данных
-							if typeof(value) == "Color3" then
-								configData[flag] = {value.R, value.G, value.B}
-							elseif typeof(value) == "EnumItem" then
-								if value.EnumType == Enum.KeyCode then
-									configData[flag] = value.Name
+					for _, item in pairs(library.items) do
+						if item.flag and item.flag ~= "Configs" and item.flag ~= "ConfigName" then
+							local value = library.flags[item.flag]
+							if value ~= nil then
+								if typeof(value) == "Color3" then
+									configData[item.flag] = {value.R, value.G, value.B}
+								elseif typeof(value) == "EnumItem" then
+									if value.EnumType == Enum.KeyCode then
+										configData[item.flag] = value.Name
+									else
+										configData[item.flag] = tostring(value)
+									end
+								elseif typeof(value) == "table" then
+									configData[item.flag] = value
 								else
-									configData[flag] = tostring(value)
-								end
-							elseif typeof(value) == "table" then
-								configData[flag] = value
-							else
-								-- Для чисел сохраняем как есть, для остального - как строку
-								if type(value) == "number" then
-									configData[flag] = value
-								else
-									configData[flag] = tostring(value)
+									if type(value) == "number" then
+										configData[item.flag] = value
+									else
+										configData[item.flag] = tostring(value)
+									end
 								end
 							end
 						end
