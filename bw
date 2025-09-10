@@ -2909,7 +2909,9 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.multichoice = multichoice or false
 				dropdown.values = {}
 				dropdown.flag = flag or text or ""
+				dropdown.items = {}
 
+				-- Main Back
 				dropdown.MainBack = Instance.new("Frame", sector.Items)
 				dropdown.MainBack.Name = "backlabel"
 				dropdown.MainBack.ZIndex = 7
@@ -2917,6 +2919,7 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.MainBack.BorderSizePixel = 0
 				dropdown.MainBack.BackgroundTransparency = 1
 
+				-- Label
 				dropdown.Label = Instance.new("TextLabel", dropdown.MainBack)
 				dropdown.Label.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				dropdown.Label.BackgroundTransparency = 1
@@ -2935,6 +2938,7 @@ function library:CreateWindow(name, size, hidebutton)
 					dropdown.Label.TextColor3 = theme.itemscolor
 				end)
 
+				-- Main Dropdown Button
 				dropdown.Main = Instance.new("TextButton", dropdown.MainBack)
 				dropdown.Main.Name = "dropdown"
 				dropdown.Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -2948,14 +2952,17 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.Main.TextColor3 = Color3.fromRGB(255, 255, 255)
 				dropdown.Main.TextSize = 15
 				dropdown.Main.TextXAlignment = Enum.TextXAlignment.Left
+
 				updateevent.Event:Connect(function(theme)
 					dropdown.Main.Font = theme.font
 				end)
 
+				-- Gradient
 				dropdown.Gradient = Instance.new("UIGradient", dropdown.Main)
 				dropdown.Gradient.Rotation = 90
 				dropdown.Gradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(49, 49, 49)), ColorSequenceKeypoint.new(1, Color3.fromRGB(39, 39, 39))}
 
+				-- Selected Label
 				dropdown.SelectedLabel = Instance.new("TextLabel", dropdown.Main)
 				dropdown.SelectedLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				dropdown.SelectedLabel.BackgroundTransparency = 1
@@ -2968,10 +2975,12 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.SelectedLabel.TextSize = 15
 				dropdown.SelectedLabel.TextStrokeTransparency = 1
 				dropdown.SelectedLabel.TextXAlignment = Enum.TextXAlignment.Left
+
 				updateevent.Event:Connect(function(theme)
 					dropdown.SelectedLabel.Font = theme.font
 				end)
 
+				-- Navigation Arrow
 				dropdown.Nav = Instance.new("ImageButton", dropdown.Main)
 				dropdown.Nav.Name = "navigation"
 				dropdown.Nav.BackgroundTransparency = 1
@@ -2983,13 +2992,15 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.Nav.Image = "rbxassetid://4918373417"
 				dropdown.Nav.ImageColor3 = Color3.fromRGB(210, 210, 210)
 
+				-- Outlines
 				dropdown.BlackOutline2 = Instance.new("Frame", dropdown.Main)
 				dropdown.BlackOutline2.Name = "blackline"
 				dropdown.BlackOutline2.ZIndex = 4
 				dropdown.BlackOutline2.Size = dropdown.Main.Size + UDim2.fromOffset(6, 6)
 				dropdown.BlackOutline2.BorderSizePixel = 0
 				dropdown.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
-				dropdown.BlackOutline2.Position = UDim2.fromOffset(- 3, - 3)
+				dropdown.BlackOutline2.Position = UDim2.fromOffset(-3, -3)
+
 				updateevent.Event:Connect(function(theme)
 					dropdown.BlackOutline2.BackgroundColor3 = theme.outlinecolor2
 				end)
@@ -3000,7 +3011,8 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.Outline.Size = dropdown.Main.Size + UDim2.fromOffset(4, 4)
 				dropdown.Outline.BorderSizePixel = 0
 				dropdown.Outline.BackgroundColor3 = window.theme.outlinecolor
-				dropdown.Outline.Position = UDim2.fromOffset(- 2, - 2)
+				dropdown.Outline.Position = UDim2.fromOffset(-2, -2)
+
 				updateevent.Event:Connect(function(theme)
 					dropdown.Outline.BackgroundColor3 = theme.outlinecolor
 				end)
@@ -3011,11 +3023,13 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.BlackOutline.Size = dropdown.Main.Size + UDim2.fromOffset(2, 2)
 				dropdown.BlackOutline.BorderSizePixel = 0
 				dropdown.BlackOutline.BackgroundColor3 = window.theme.outlinecolor2
-				dropdown.BlackOutline.Position = UDim2.fromOffset(- 1, - 1)
+				dropdown.BlackOutline.Position = UDim2.fromOffset(-1, -1)
+
 				updateevent.Event:Connect(function(theme)
 					dropdown.BlackOutline.BackgroundColor3 = theme.outlinecolor2
 				end)
 
+				-- Items Frame (ScrollingFrame)
 				dropdown.ItemsFrame = Instance.new("ScrollingFrame", dropdown.Main)
 				dropdown.ItemsFrame.Name = "itemsframe"
 				dropdown.ItemsFrame.BorderSizePixel = 0
@@ -3026,25 +3040,30 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.ItemsFrame.ScrollingDirection = Enum.ScrollingDirection.Y
 				dropdown.ItemsFrame.Visible = false
 				dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+				dropdown.ItemsFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y -- АВТОМАТИЧЕСКИЙ РАЗМЕР!
 
+				-- Layout
 				dropdown.ListLayout = Instance.new("UIListLayout", dropdown.ItemsFrame)
 				dropdown.ListLayout.FillDirection = Enum.FillDirection.Vertical
 				dropdown.ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+				dropdown.ListLayout.Padding = UDim.new(0, 2)
 
+				-- Padding
 				dropdown.ListPadding = Instance.new("UIPadding", dropdown.ItemsFrame)
 				dropdown.ListPadding.PaddingTop = UDim.new(0, 2)
 				dropdown.ListPadding.PaddingBottom = UDim.new(0, 2)
 				dropdown.ListPadding.PaddingLeft = UDim.new(0, 2)
 				dropdown.ListPadding.PaddingRight = UDim.new(0, 2)
 
+				-- Items Outlines
 				dropdown.BlackOutline2Items = Instance.new("Frame", dropdown.Main)
 				dropdown.BlackOutline2Items.Name = "blackline"
 				dropdown.BlackOutline2Items.ZIndex = 7
-				dropdown.BlackOutline2Items.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset + 6, 6)
 				dropdown.BlackOutline2Items.BorderSizePixel = 0
 				dropdown.BlackOutline2Items.BackgroundColor3 = window.theme.outlinecolor2
-				dropdown.BlackOutline2Items.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(- 3, - 3)
+				dropdown.BlackOutline2Items.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(-3, -3)
 				dropdown.BlackOutline2Items.Visible = false
+
 				updateevent.Event:Connect(function(theme)
 					dropdown.BlackOutline2Items.BackgroundColor3 = theme.outlinecolor2
 				end)
@@ -3052,11 +3071,11 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.OutlineItems = Instance.new("Frame", dropdown.Main)
 				dropdown.OutlineItems.Name = "blackline"
 				dropdown.OutlineItems.ZIndex = 7
-				dropdown.OutlineItems.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset + 4, 4)
 				dropdown.OutlineItems.BorderSizePixel = 0
 				dropdown.OutlineItems.BackgroundColor3 = window.theme.outlinecolor
-				dropdown.OutlineItems.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(- 2, - 2)
+				dropdown.OutlineItems.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(-2, -2)
 				dropdown.OutlineItems.Visible = false
+
 				updateevent.Event:Connect(function(theme)
 					dropdown.OutlineItems.BackgroundColor3 = theme.outlinecolor
 				end)
@@ -3064,15 +3083,16 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.BlackOutlineItems = Instance.new("Frame", dropdown.Main)
 				dropdown.BlackOutlineItems.Name = "blackline"
 				dropdown.BlackOutlineItems.ZIndex = 7
-				dropdown.BlackOutlineItems.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset + 2, 2)
 				dropdown.BlackOutlineItems.BorderSizePixel = 0
 				dropdown.BlackOutlineItems.BackgroundColor3 = window.theme.outlinecolor2
-				dropdown.BlackOutlineItems.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(- 1, - 1)
+				dropdown.BlackOutlineItems.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(-1, -1)
 				dropdown.BlackOutlineItems.Visible = false
+
 				updateevent.Event:Connect(function(theme)
 					dropdown.BlackOutlineItems.BackgroundColor3 = theme.outlinecolor2
 				end)
 
+				-- Ignore Button
 				dropdown.IgnoreBackButtons = Instance.new("TextButton", dropdown.Main)
 				dropdown.IgnoreBackButtons.BackgroundTransparency = 1
 				dropdown.IgnoreBackButtons.BorderSizePixel = 0
@@ -3083,27 +3103,30 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.IgnoreBackButtons.Visible = false
 				dropdown.IgnoreBackButtons.AutoButtonColor = false
 
+				-- Flags
 				if dropdown.flag and dropdown.flag ~= "" then
 					library.flags[dropdown.flag] = dropdown.multichoice and {dropdown.default or dropdown.defaultitems[1] or ""} or (dropdown.default or dropdown.defaultitems[1] or "")
 				end
 
-				-- Автоматическое обновление CanvasSize
-				dropdown.ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-					dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
-
-					-- Обновляем размер фрейма элементов
-					local maxHeight = math.min(156, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
-					dropdown.ItemsFrame.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset, maxHeight)
-
-					-- Обновляем outline элементы
+				-- Функция для обновления размеров outline элементов
+				local function updateItemsOutlineSize()
+					dropdown.BlackOutline2Items.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(6, 6)
 					dropdown.OutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(4, 4)
 					dropdown.BlackOutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(2, 2)
-					dropdown.BlackOutline2Items.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(6, 6)
 					dropdown.IgnoreBackButtons.Size = dropdown.ItemsFrame.Size
+				end
+
+				-- Автоматическое обновление размеров
+				dropdown.ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+					local contentSize = dropdown.ListLayout.AbsoluteContentSize
+					local maxHeight = math.min(156, contentSize.Y + 4)
+					dropdown.ItemsFrame.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset, maxHeight)
+					updateItemsOutlineSize()
 				end)
 
+				-- Methods
 				function dropdown:isSelected(item)
-					for i, v in pairs(dropdown.values) do
+					for _, v in ipairs(dropdown.values) do
 						if v == item then
 							return true
 						end
@@ -3133,7 +3156,7 @@ function library:CreateWindow(name, size, hidebutton)
 						dropdown:updateText(table.concat(value, ", "))
 						pcall(dropdown.callback, value)
 					else
-						dropdown:updateText(value)
+						dropdown:updateText(tostring(value))
 						dropdown.values = {value}
 						pcall(dropdown.callback, value)
 					end
@@ -3148,17 +3171,15 @@ function library:CreateWindow(name, size, hidebutton)
 					return dropdown.multichoice and dropdown.values or dropdown.values[1]
 				end
 
-				dropdown.items = {}
 				function dropdown:Add(v)
 					local Item = Instance.new("TextButton", dropdown.ItemsFrame)
 					Item.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 					Item.TextColor3 = Color3.fromRGB(255, 255, 255)
 					Item.BorderSizePixel = 0
-					Item.Position = UDim2.fromOffset(0, 0)
-					Item.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset - 4, 20)
+					Item.Size = UDim2.new(1, -4, 0, 20)
 					Item.ZIndex = 9
-					Item.Text = v
-					Item.Name = "Item_" .. tostring(#dropdown.items + 1)
+					Item.Text = tostring(v)
+					Item.Name = tostring(v)
 					Item.AutoButtonColor = false
 					Item.Font = window.theme.font
 					Item.TextSize = 15
@@ -3168,9 +3189,10 @@ function library:CreateWindow(name, size, hidebutton)
 					Item.MouseButton1Down:Connect(function()
 						if dropdown.multichoice then
 							if dropdown:isSelected(v) then
-								for i2, v2 in pairs(dropdown.values) do
-									if v2 == v then
-										table.remove(dropdown.values, i2)
+								for i, selected in ipairs(dropdown.values) do
+									if selected == v then
+										table.remove(dropdown.values, i)
+										break
 									end
 								end
 								dropdown:Set(dropdown.values)
@@ -3178,8 +3200,8 @@ function library:CreateWindow(name, size, hidebutton)
 								table.insert(dropdown.values, v)
 								dropdown:Set(dropdown.values)
 							end
-							return
 						else
+							dropdown:Set(v)
 							dropdown.Nav.Rotation = 90
 							dropdown.ItemsFrame.Visible = false
 							dropdown.ItemsFrame.Active = false
@@ -3189,113 +3211,95 @@ function library:CreateWindow(name, size, hidebutton)
 							dropdown.IgnoreBackButtons.Visible = false
 							dropdown.IgnoreBackButtons.Active = false
 						end
-
-						dropdown:Set(v)
 					end)
 
 					runservice.RenderStepped:Connect(function()
-						if dropdown.multichoice and dropdown:isSelected(v) or dropdown.values[1] == v then
+						if (dropdown.multichoice and dropdown:isSelected(v)) or (not dropdown.multichoice and dropdown.values[1] == v) then
 							Item.BackgroundColor3 = Color3.fromRGB(64, 64, 64)
 							Item.TextColor3 = window.theme.accentcolor
-							Item.Text = " " .. v
 						else
 							Item.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 							Item.TextColor3 = Color3.fromRGB(255, 255, 255)
-							Item.Text = v
 						end
 					end)
 
 					table.insert(dropdown.items, v)
-
-					-- Принудительное обновление через небольшой промежуток времени
-					task.spawn(function()
-						task.wait(0.05)
-						dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
-					end)
+					return Item
 				end
 
 				function dropdown:Remove(value)
-					local item = dropdown.ItemsFrame:FindFirstChild("Item_" .. value)
-					if not item then
-						for _, child in pairs(dropdown.ItemsFrame:GetChildren()) do
-							if child:IsA("TextButton") and child.Text == value then
-								item = child
-								break
-							end
-						end
-					end
-
+					local item = dropdown.ItemsFrame:FindFirstChild(tostring(value))
 					if item then
-						for i, v in pairs(dropdown.items) do
+						for i, v in ipairs(dropdown.items) do
 							if v == value then
 								table.remove(dropdown.items, i)
 								break
 							end
 						end
 						item:Destroy()
-
-						-- Обновляем после удаления
-						task.wait(0.05)
-						dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
 					end
 				end
 
-				function dropdown:RefreshScroll()
-					dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
-					local maxHeight = math.min(156, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
-					dropdown.ItemsFrame.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset, maxHeight)
+				function dropdown:Refresh()
+					-- Очищаем текущие элементы
+					for i = #dropdown.items, 1, -1 do
+						dropdown:Remove(dropdown.items[i])
+					end
 
-					dropdown.OutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(4, 4)
-					dropdown.BlackOutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(2, 2)
-					dropdown.BlackOutline2Items.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(6, 6)
-					dropdown.IgnoreBackButtons.Size = dropdown.ItemsFrame.Size
+					-- Добавляем новые элементы
+					for _, item in ipairs(dropdown.defaultitems) do
+						dropdown:Add(item)
+					end
+
+					-- Устанавливаем значение по умолчанию
+					if dropdown.default then
+						dropdown:Set(dropdown.default)
+					end
 				end
 
-				for i, v in pairs(dropdown.defaultitems) do
-					dropdown:Add(v)
+				-- Инициализация
+				for _, item in ipairs(dropdown.defaultitems) do
+					dropdown:Add(item)
 				end
 
 				if dropdown.default then
 					dropdown:Set(dropdown.default)
 				end
 
-				local MouseButton1Down = function()
+				-- Обработчики кликов
+				local function toggleDropdown()
 					if dropdown.Nav.Rotation == 90 then
-						tweenservice:Create(dropdown.Nav, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = - 90}):Play()
-						if dropdown.items and #dropdown.items ~= 0 then
-							dropdown.ItemsFrame.ScrollingEnabled = true
-							sector.Main.Parent.ScrollingEnabled = false
+						tweenservice:Create(dropdown.Nav, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = -90}):Play()
+						if #dropdown.items > 0 then
 							dropdown.ItemsFrame.Visible = true
 							dropdown.ItemsFrame.Active = true
-							dropdown.IgnoreBackButtons.Visible = true
-							dropdown.IgnoreBackButtons.Active = true
 							dropdown.OutlineItems.Visible = true
 							dropdown.BlackOutlineItems.Visible = true
 							dropdown.BlackOutline2Items.Visible = true
-
-							-- Обновляем скролл при открытии
-							dropdown:RefreshScroll()
+							dropdown.IgnoreBackButtons.Visible = true
+							dropdown.IgnoreBackButtons.Active = true
+							updateItemsOutlineSize()
 						end
 					else
 						tweenservice:Create(dropdown.Nav, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = 90}):Play()
-						dropdown.ItemsFrame.ScrollingEnabled = false
-						sector.Main.Parent.ScrollingEnabled = true
 						dropdown.ItemsFrame.Visible = false
 						dropdown.ItemsFrame.Active = false
-						dropdown.IgnoreBackButtons.Visible = false
-						dropdown.IgnoreBackButtons.Active = false
 						dropdown.OutlineItems.Visible = false
 						dropdown.BlackOutlineItems.Visible = false
 						dropdown.BlackOutline2Items.Visible = false
+						dropdown.IgnoreBackButtons.Visible = false
+						dropdown.IgnoreBackButtons.Active = false
 					end
 				end
 
-				dropdown.Main.MouseButton1Down:Connect(MouseButton1Down)
-				dropdown.Nav.MouseButton1Down:Connect(MouseButton1Down)
+				dropdown.Main.MouseButton1Down:Connect(toggleDropdown)
+				dropdown.Nav.MouseButton1Down:Connect(toggleDropdown)
 
+				-- Hover effects
 				dropdown.BlackOutline2.MouseEnter:Connect(function()
 					dropdown.BlackOutline2.BackgroundColor3 = window.theme.accentcolor
 				end)
+
 				dropdown.BlackOutline2.MouseLeave:Connect(function()
 					dropdown.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
 				end)
