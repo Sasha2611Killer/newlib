@@ -2909,9 +2909,7 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.multichoice = multichoice or false
 				dropdown.values = {}
 				dropdown.flag = flag or text or ""
-				dropdown.items = {}
 
-				-- Main Back
 				dropdown.MainBack = Instance.new("Frame", sector.Items)
 				dropdown.MainBack.Name = "backlabel"
 				dropdown.MainBack.ZIndex = 7
@@ -2919,7 +2917,6 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.MainBack.BorderSizePixel = 0
 				dropdown.MainBack.BackgroundTransparency = 1
 
-				-- Label
 				dropdown.Label = Instance.new("TextLabel", dropdown.MainBack)
 				dropdown.Label.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				dropdown.Label.BackgroundTransparency = 1
@@ -2938,7 +2935,6 @@ function library:CreateWindow(name, size, hidebutton)
 					dropdown.Label.TextColor3 = theme.itemscolor
 				end)
 
-				-- Main Dropdown Button
 				dropdown.Main = Instance.new("TextButton", dropdown.MainBack)
 				dropdown.Main.Name = "dropdown"
 				dropdown.Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -2952,22 +2948,19 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.Main.TextColor3 = Color3.fromRGB(255, 255, 255)
 				dropdown.Main.TextSize = 15
 				dropdown.Main.TextXAlignment = Enum.TextXAlignment.Left
-
 				updateevent.Event:Connect(function(theme)
 					dropdown.Main.Font = theme.font
 				end)
 
-				-- Gradient
 				dropdown.Gradient = Instance.new("UIGradient", dropdown.Main)
 				dropdown.Gradient.Rotation = 90
 				dropdown.Gradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(49, 49, 49)), ColorSequenceKeypoint.new(1, Color3.fromRGB(39, 39, 39))}
 
-				-- Selected Label
 				dropdown.SelectedLabel = Instance.new("TextLabel", dropdown.Main)
 				dropdown.SelectedLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				dropdown.SelectedLabel.BackgroundTransparency = 1
 				dropdown.SelectedLabel.Position = UDim2.fromOffset(5, 2)
-				dropdown.SelectedLabel.Size = UDim2.fromOffset(sector.Main.Size.X.Offset - 30, 13)
+				dropdown.SelectedLabel.Size = UDim2.fromOffset(130, 13)
 				dropdown.SelectedLabel.Font = window.theme.font
 				dropdown.SelectedLabel.Text = dropdown.text
 				dropdown.SelectedLabel.ZIndex = 5
@@ -2975,12 +2968,10 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.SelectedLabel.TextSize = 15
 				dropdown.SelectedLabel.TextStrokeTransparency = 1
 				dropdown.SelectedLabel.TextXAlignment = Enum.TextXAlignment.Left
-
 				updateevent.Event:Connect(function(theme)
 					dropdown.SelectedLabel.Font = theme.font
 				end)
 
-				-- Navigation Arrow
 				dropdown.Nav = Instance.new("ImageButton", dropdown.Main)
 				dropdown.Nav.Name = "navigation"
 				dropdown.Nav.BackgroundTransparency = 1
@@ -2992,15 +2983,13 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.Nav.Image = "rbxassetid://4918373417"
 				dropdown.Nav.ImageColor3 = Color3.fromRGB(210, 210, 210)
 
-				-- Outlines
 				dropdown.BlackOutline2 = Instance.new("Frame", dropdown.Main)
 				dropdown.BlackOutline2.Name = "blackline"
 				dropdown.BlackOutline2.ZIndex = 4
 				dropdown.BlackOutline2.Size = dropdown.Main.Size + UDim2.fromOffset(6, 6)
 				dropdown.BlackOutline2.BorderSizePixel = 0
 				dropdown.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
-				dropdown.BlackOutline2.Position = UDim2.fromOffset(-3, -3)
-
+				dropdown.BlackOutline2.Position = UDim2.fromOffset(- 3, - 3)
 				updateevent.Event:Connect(function(theme)
 					dropdown.BlackOutline2.BackgroundColor3 = theme.outlinecolor2
 				end)
@@ -3011,8 +3000,7 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.Outline.Size = dropdown.Main.Size + UDim2.fromOffset(4, 4)
 				dropdown.Outline.BorderSizePixel = 0
 				dropdown.Outline.BackgroundColor3 = window.theme.outlinecolor
-				dropdown.Outline.Position = UDim2.fromOffset(-2, -2)
-
+				dropdown.Outline.Position = UDim2.fromOffset(- 2, - 2)
 				updateevent.Event:Connect(function(theme)
 					dropdown.Outline.BackgroundColor3 = theme.outlinecolor
 				end)
@@ -3023,40 +3011,40 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.BlackOutline.Size = dropdown.Main.Size + UDim2.fromOffset(2, 2)
 				dropdown.BlackOutline.BorderSizePixel = 0
 				dropdown.BlackOutline.BackgroundColor3 = window.theme.outlinecolor2
-				dropdown.BlackOutline.Position = UDim2.fromOffset(-1, -1)
-
+				dropdown.BlackOutline.Position = UDim2.fromOffset(- 1, - 1)
 				updateevent.Event:Connect(function(theme)
 					dropdown.BlackOutline.BackgroundColor3 = theme.outlinecolor2
 				end)
 
-				-- Items Frame (ScrollingFrame) - ФИКСИРОВАННЫЙ РАЗМЕР!
 				dropdown.ItemsFrame = Instance.new("ScrollingFrame", dropdown.Main)
 				dropdown.ItemsFrame.Name = "itemsframe"
 				dropdown.ItemsFrame.BorderSizePixel = 0
 				dropdown.ItemsFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 				dropdown.ItemsFrame.Position = UDim2.fromOffset(0, dropdown.Main.Size.Y.Offset + 8)
-				dropdown.ItemsFrame.ScrollBarThickness = 4
+				dropdown.ItemsFrame.ScrollBarThickness = 2
 				dropdown.ItemsFrame.ZIndex = 8
-				dropdown.ItemsFrame.ScrollingDirection = Enum.ScrollingDirection.Y
+				dropdown.ItemsFrame.ScrollingDirection = "Y"
 				dropdown.ItemsFrame.Visible = false
-				dropdown.ItemsFrame.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset, 156) -- ФИКСИРОВАННАЯ ВЫСОТА
-				dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+				dropdown.ItemsFrame.CanvasSize = UDim2.fromOffset(dropdown.Main.AbsoluteSize.X, 0)
 
-				-- Layout
 				dropdown.ListLayout = Instance.new("UIListLayout", dropdown.ItemsFrame)
 				dropdown.ListLayout.FillDirection = Enum.FillDirection.Vertical
 				dropdown.ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-				-- Items Outlines
+				dropdown.ListPadding = Instance.new("UIPadding", dropdown.ItemsFrame)
+				dropdown.ListPadding.PaddingTop = UDim.new(0, 2)
+				dropdown.ListPadding.PaddingBottom = UDim.new(0, 2)
+				dropdown.ListPadding.PaddingLeft = UDim.new(0, 2)
+				dropdown.ListPadding.PaddingRight = UDim.new(0, 2)
+
 				dropdown.BlackOutline2Items = Instance.new("Frame", dropdown.Main)
 				dropdown.BlackOutline2Items.Name = "blackline"
 				dropdown.BlackOutline2Items.ZIndex = 7
 				dropdown.BlackOutline2Items.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(6, 6)
 				dropdown.BlackOutline2Items.BorderSizePixel = 0
 				dropdown.BlackOutline2Items.BackgroundColor3 = window.theme.outlinecolor2
-				dropdown.BlackOutline2Items.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(-3, -3)
+				dropdown.BlackOutline2Items.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(- 3, - 3)
 				dropdown.BlackOutline2Items.Visible = false
-
 				updateevent.Event:Connect(function(theme)
 					dropdown.BlackOutline2Items.BackgroundColor3 = theme.outlinecolor2
 				end)
@@ -3067,9 +3055,8 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.OutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(4, 4)
 				dropdown.OutlineItems.BorderSizePixel = 0
 				dropdown.OutlineItems.BackgroundColor3 = window.theme.outlinecolor
-				dropdown.OutlineItems.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(-2, -2)
+				dropdown.OutlineItems.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(- 2, - 2)
 				dropdown.OutlineItems.Visible = false
-
 				updateevent.Event:Connect(function(theme)
 					dropdown.OutlineItems.BackgroundColor3 = theme.outlinecolor
 				end)
@@ -3077,39 +3064,36 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.BlackOutlineItems = Instance.new("Frame", dropdown.Main)
 				dropdown.BlackOutlineItems.Name = "blackline"
 				dropdown.BlackOutlineItems.ZIndex = 7
-				dropdown.BlackOutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(2, 2)
+				dropdown.BlackOutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(- 2, - 2)
 				dropdown.BlackOutlineItems.BorderSizePixel = 0
 				dropdown.BlackOutlineItems.BackgroundColor3 = window.theme.outlinecolor2
-				dropdown.BlackOutlineItems.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(-1, -1)
+				dropdown.BlackOutlineItems.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(- 1, - 1)
 				dropdown.BlackOutlineItems.Visible = false
-
 				updateevent.Event:Connect(function(theme)
 					dropdown.BlackOutlineItems.BackgroundColor3 = theme.outlinecolor2
 				end)
 
-				-- Ignore Button
 				dropdown.IgnoreBackButtons = Instance.new("TextButton", dropdown.Main)
 				dropdown.IgnoreBackButtons.BackgroundTransparency = 1
 				dropdown.IgnoreBackButtons.BorderSizePixel = 0
 				dropdown.IgnoreBackButtons.Position = UDim2.fromOffset(0, dropdown.Main.Size.Y.Offset + 8)
-				dropdown.IgnoreBackButtons.Size = dropdown.ItemsFrame.Size
+				dropdown.IgnoreBackButtons.Size = UDim2.new(0, 0, 0, 0)
 				dropdown.IgnoreBackButtons.ZIndex = 7
 				dropdown.IgnoreBackButtons.Text = ""
 				dropdown.IgnoreBackButtons.Visible = false
 				dropdown.IgnoreBackButtons.AutoButtonColor = false
 
-				-- Flags
 				if dropdown.flag and dropdown.flag ~= "" then
 					library.flags[dropdown.flag] = dropdown.multichoice and {dropdown.default or dropdown.defaultitems[1] or ""} or (dropdown.default or dropdown.defaultitems[1] or "")
 				end
 
-				-- Methods
 				function dropdown:isSelected(item)
-					for _, v in ipairs(dropdown.values) do
+					for i, v in (dropdown.values) do
 						if v == item then
 							return true
 						end
 					end
+
 					return false
 				end
 
@@ -3118,12 +3102,8 @@ function library:CreateWindow(name, size, hidebutton)
 				end
 
 				function dropdown:updateText(text)
-					if type(text) == "table" then
-						text = table.concat(text, ", ")
-					end
-					local maxChars = 35
-					if #text > maxChars then
-						text = text:sub(1, maxChars - 2) .. ".."
+					if #text >= 27 then
+						text = text:sub(1, 25) .. ".."
 					end
 					dropdown.SelectedLabel.Text = text
 				end
@@ -3135,7 +3115,7 @@ function library:CreateWindow(name, size, hidebutton)
 						dropdown:updateText(table.concat(value, ", "))
 						pcall(dropdown.callback, value)
 					else
-						dropdown:updateText(tostring(value))
+						dropdown:updateText(value)
 						dropdown.values = {value}
 						pcall(dropdown.callback, value)
 					end
@@ -3150,28 +3130,30 @@ function library:CreateWindow(name, size, hidebutton)
 					return dropdown.multichoice and dropdown.values or dropdown.values[1]
 				end
 
+				dropdown.items = {}
 				function dropdown:Add(v)
 					local Item = Instance.new("TextButton", dropdown.ItemsFrame)
 					Item.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 					Item.TextColor3 = Color3.fromRGB(255, 255, 255)
 					Item.BorderSizePixel = 0
-					Item.Size = UDim2.new(1, -4, 0, 20)
+					Item.Position = UDim2.fromOffset(0, 0)
+					Item.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset - 4, 20)
 					Item.ZIndex = 9
-					Item.Text = tostring(v)
-					Item.Name = tostring(v)
+					Item.Text = v
+					Item.Name = v
 					Item.AutoButtonColor = false
 					Item.Font = window.theme.font
 					Item.TextSize = 15
 					Item.TextXAlignment = Enum.TextXAlignment.Left
 					Item.TextStrokeTransparency = 1
+					dropdown.ItemsFrame.CanvasSize = dropdown.ItemsFrame.CanvasSize + UDim2.fromOffset(0, Item.AbsoluteSize.Y)
 
 					Item.MouseButton1Down:Connect(function()
 						if dropdown.multichoice then
 							if dropdown:isSelected(v) then
-								for i, selected in ipairs(dropdown.values) do
-									if selected == v then
-										table.remove(dropdown.values, i)
-										break
+								for i2, v2 in (dropdown.values) do
+									if v2 == v then
+										table.remove(dropdown.values, i2)
 									end
 								end
 								dropdown:Set(dropdown.values)
@@ -3179,8 +3161,9 @@ function library:CreateWindow(name, size, hidebutton)
 								table.insert(dropdown.values, v)
 								dropdown:Set(dropdown.values)
 							end
+
+							return
 						else
-							dropdown:Set(v)
 							dropdown.Nav.Rotation = 90
 							dropdown.ItemsFrame.Visible = false
 							dropdown.ItemsFrame.Active = false
@@ -3190,102 +3173,232 @@ function library:CreateWindow(name, size, hidebutton)
 							dropdown.IgnoreBackButtons.Visible = false
 							dropdown.IgnoreBackButtons.Active = false
 						end
+
+						dropdown:Set(v)
+
+						return
 					end)
 
 					runservice.RenderStepped:Connect(function()
-						if (dropdown.multichoice and dropdown:isSelected(v)) or (not dropdown.multichoice and dropdown.values[1] == v) then
+						if dropdown.multichoice and dropdown:isSelected(v) or dropdown.values[1] == v then
 							Item.BackgroundColor3 = Color3.fromRGB(64, 64, 64)
 							Item.TextColor3 = window.theme.accentcolor
+							Item.Text = " " .. v
 						else
 							Item.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 							Item.TextColor3 = Color3.fromRGB(255, 255, 255)
+							Item.Text = v
 						end
 					end)
 
 					table.insert(dropdown.items, v)
+					dropdown.ItemsFrame.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset, math.clamp(#dropdown.items * Item.AbsoluteSize.Y, 20, 156) + 4)
+					dropdown.ItemsFrame.CanvasSize = UDim2.fromOffset(dropdown.ItemsFrame.AbsoluteSize.X, (#dropdown.items * Item.AbsoluteSize.Y) + 4)
 
-					-- Автоматическое обновление CanvasSize
-					task.spawn(function()
-						task.wait(0.05)
-						dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
-					end)
-
-					return Item
+					dropdown.OutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(4, 4)
+					dropdown.BlackOutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(2, 2)
+					dropdown.BlackOutline2Items.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(6, 6)
+					dropdown.IgnoreBackButtons.Size = dropdown.ItemsFrame.Size
 				end
 
 				function dropdown:Remove(value)
-					local item = dropdown.ItemsFrame:FindFirstChild(tostring(value))
+					local item = dropdown.ItemsFrame:FindFirstChild(value)
 					if item then
-						for i, v in ipairs(dropdown.items) do
+						for i, v in (dropdown.items) do
 							if v == value then
 								table.remove(dropdown.items, i)
-								break
 							end
 						end
-						item:Destroy()
 
-						-- Обновляем CanvasSize после удаления
-						task.spawn(function()
-							task.wait(0.05)
-							dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
-						end)
+						dropdown.ItemsFrame.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset, math.clamp(#dropdown.items * item.AbsoluteSize.Y, 20, 156) + 4)
+						dropdown.ItemsFrame.CanvasSize = UDim2.fromOffset(dropdown.ItemsFrame.AbsoluteSize.X, (#dropdown.items * item.AbsoluteSize.Y) + 4)
+
+						dropdown.OutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(2, 2)
+						dropdown.BlackOutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(4, 4)
+						dropdown.BlackOutline2Items.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(6, 6)
+						dropdown.IgnoreBackButtons.Size = dropdown.ItemsFrame.Size
+
+						item:Remove()
 					end
 				end
 
-				-- Инициализация - ДОБАВЛЯЕМ ЭЛЕМЕНТЫ
-				for _, item in ipairs(dropdown.defaultitems) do
-					dropdown:Add(item)
+				for i, v in (dropdown.defaultitems) do
+					dropdown:Add(v)
 				end
 
 				if dropdown.default then
 					dropdown:Set(dropdown.default)
 				end
 
-				-- ОБНОВЛЯЕМ CANVAS SIZE ПОСЛЕ ДОБАВЛЕНИЯ ВСЕХ ЭЛЕМЕНТОВ
-				task.spawn(function()
-					task.wait(0.1)
-					dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
-				end)
-
-				-- Обработчики кликов
-				local function toggleDropdown()
+				local MouseButton1Down = function()
 					if dropdown.Nav.Rotation == 90 then
-						tweenservice:Create(dropdown.Nav, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = -90}):Play()
-						if #dropdown.items > 0 then
+						tweenservice:Create(dropdown.Nav, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = - 90}):Play()
+						if dropdown.items and #dropdown.items ~= 0 then
+							dropdown.ItemsFrame.ScrollingEnabled = true
+							sector.Main.Parent.ScrollingEnabled = true
 							dropdown.ItemsFrame.Visible = true
 							dropdown.ItemsFrame.Active = true
+							dropdown.IgnoreBackButtons.Visible = true
+							dropdown.IgnoreBackButtons.Active = true
 							dropdown.OutlineItems.Visible = true
 							dropdown.BlackOutlineItems.Visible = true
 							dropdown.BlackOutline2Items.Visible = true
-							dropdown.IgnoreBackButtons.Visible = true
-							dropdown.IgnoreBackButtons.Active = true
 						end
 					else
 						tweenservice:Create(dropdown.Nav, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = 90}):Play()
+						dropdown.ItemsFrame.ScrollingEnabled = true
+						sector.Main.Parent.ScrollingEnabled = true
 						dropdown.ItemsFrame.Visible = false
 						dropdown.ItemsFrame.Active = false
+						dropdown.IgnoreBackButtons.Visible = false
+						dropdown.IgnoreBackButtons.Active = false
 						dropdown.OutlineItems.Visible = false
 						dropdown.BlackOutlineItems.Visible = false
 						dropdown.BlackOutline2Items.Visible = false
-						dropdown.IgnoreBackButtons.Visible = false
-						dropdown.IgnoreBackButtons.Active = false
 					end
 				end
 
-				dropdown.Main.MouseButton1Down:Connect(toggleDropdown)
-				dropdown.Nav.MouseButton1Down:Connect(toggleDropdown)
+				dropdown.Main.MouseButton1Down:Connect(MouseButton1Down)
+				dropdown.Nav.MouseButton1Down:Connect(MouseButton1Down)
 
-				-- Hover effects
 				dropdown.BlackOutline2.MouseEnter:Connect(function()
 					dropdown.BlackOutline2.BackgroundColor3 = window.theme.accentcolor
 				end)
-
 				dropdown.BlackOutline2.MouseLeave:Connect(function()
 					dropdown.BlackOutline2.BackgroundColor3 = window.theme.outlinecolor2
 				end)
 
 				sector:FixSize()
 				table.insert(library.items, dropdown)
+
+				return dropdown
+			end
+			
+			function sector:AddDropdownConfig(configName, folderPath, default, multichoice, callback, flag)
+				local dropdown = {}
+
+				-- Получаем список файлов из папки
+				local function GetConfigFiles()
+					local configFiles = {}
+
+					-- Проверяем существует ли папка
+					if not isfolder(folderPath) then
+						warn("Папка конфигов не найдена:", folderPath)
+						return {"No configs found"}
+					end
+
+					-- Получаем все файлы в папке
+					local files = listfiles(folderPath)
+					for _, filePath in ipairs(files) do
+						-- Извлекаем только имя файла без пути и расширения
+						local fileName = filePath:match("[^\\/]+$") -- Берем только имя файла
+						local nameWithoutExt = fileName:gsub("%..+$", "") -- Убираем расширение
+
+						if nameWithoutExt ~= "" then
+							table.insert(configFiles, nameWithoutExt)
+						end
+					end
+
+					if #configFiles == 0 then
+						table.insert(configFiles, "No configs found")
+					end
+
+					return configFiles
+				end
+
+				-- Создаем дропдаун с файлами из папки
+				dropdown = self:AddDropdown(configName, GetConfigFiles(), default, multichoice, function(Value)
+					-- При выборе файла загружаем его содержимое
+					if Value ~= "No configs found" then
+						local filePath = folderPath .. "/" .. Value .. ".txt" -- Предполагаем .txt расширение
+						if isfile(filePath) then
+							local fileContent = readfile(filePath)
+							pcall(callback, Value, fileContent)
+						else
+							warn("Файл не найден:", filePath)
+							pcall(callback, Value, nil)
+						end
+					else
+						pcall(callback, Value, nil)
+					end
+				end, flag)
+
+				-- Функция для обновления списка конфигов
+				local function UpdateConfigList()
+					local currentConfigs = GetConfigFiles()
+					local currentSelection = dropdown:Get()
+
+					-- Удаляем конфиги, которых больше нет
+					for i = #dropdown.items, 1, -1 do
+						local configName = dropdown.items[i]
+						if not table.find(currentConfigs, configName) then
+							dropdown:Remove(configName)
+						end
+					end
+
+					-- Добавляем новые конфиги
+					for _, configName in ipairs(currentConfigs) do
+						if not dropdown.ItemsFrame:FindFirstChild(configName) then
+							dropdown:Add(configName)
+						end
+					end
+				end
+
+				-- Функция для сохранения конфига
+				function dropdown:SaveConfig(configName, content)
+					if not isfolder(folderPath) then
+						makefolder(folderPath)
+					end
+
+					local filePath = folderPath .. "/" .. configName .. ".txt"
+					writefile(filePath, content)
+
+					-- Обновляем список
+					UpdateConfigList()
+				end
+
+				-- Функция для удаления конфига
+				function dropdown:DeleteConfig(configName)
+					local filePath = folderPath .. "/" .. configName .. ".txt"
+					if isfile(filePath) then
+						delfile(filePath)
+
+						-- Обновляем список
+						UpdateConfigList()
+
+						-- Если удаленный конфиг был выбран, сбрасываем выбор
+						if dropdown:Get() == configName then
+							dropdown:Set("")
+						end
+					end
+				end
+
+				-- Функция для создания нового конфига
+				function dropdown:CreateConfig(configName, content)
+					if configName and configName ~= "" and configName ~= "No configs found" then
+						dropdown:SaveConfig(configName, content or "")
+					end
+				end
+
+				-- Функция для получения содержимого выбранного конфига
+				function dropdown:GetSelectedConfigContent()
+					local selected = dropdown:Get()
+					if selected and selected ~= "No configs found" then
+						local filePath = folderPath .. "/" .. selected .. ".txt"
+						if isfile(filePath) then
+							return readfile(filePath)
+						end
+					end
+					return nil
+				end
+
+				-- Функция для получения списка всех конфигов
+				function dropdown:GetAllConfigs()
+					return GetConfigFiles()
+				end
+
+				-- Инициализируем список
+				task.spawn(UpdateConfigList)
 
 				return dropdown
 			end
