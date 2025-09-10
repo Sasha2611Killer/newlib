@@ -3120,9 +3120,6 @@ function library:CreateWindow(name, size, hidebutton)
 					dropdown.IgnoreBackButtons.Size = dropdown.ItemsFrame.Size
 				end
 
-				-- Автоматическое обновление размеров
-				dropdown.ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSizes)
-
 				-- Methods
 				function dropdown:isSelected(item)
 					for _, v in ipairs(dropdown.values) do
@@ -3236,7 +3233,12 @@ function library:CreateWindow(name, size, hidebutton)
 							end
 						end
 						item:Destroy()
-						updateSizes() -- Обновляем размеры после удаления
+
+						-- Принудительное обновление размеров после удаления
+						task.spawn(function()
+							task.wait(0.05)
+							updateSizes()
+						end)
 					end
 				end
 
@@ -3256,10 +3258,14 @@ function library:CreateWindow(name, size, hidebutton)
 						dropdown:Set(dropdown.default)
 					end
 
-					updateSizes() -- Обновляем размеры
+					-- Принудительное обновление размеров
+					task.spawn(function()
+						task.wait(0.1)
+						updateSizes()
+					end)
 				end
 
-				-- Инициализация
+				-- Инициализация - ДОБАВЛЯЕМ ЭЛЕМЕНТЫ
 				for _, item in ipairs(dropdown.defaultitems) do
 					dropdown:Add(item)
 				end
@@ -3268,9 +3274,13 @@ function library:CreateWindow(name, size, hidebutton)
 					dropdown:Set(dropdown.default)
 				end
 
-				-- ОБЯЗАТЕЛЬНО ВЫЗВАТЬ ОБНОВЛЕНИЕ РАЗМЕРОВ ПОСЛЕ ДОБАВЛЕНИЯ ВСЕХ ЭЛЕМЕНТОВ
+				-- КРИТИЧЕСКИ ВАЖНО: ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ РАЗМЕРОВ ПОСЛЕ ДОБАВЛЕНИЯ ВСЕХ ЭЛЕМЕНТОВ
 				task.spawn(function()
-					task.wait(0.1) -- Небольшая задержка для применения layout
+					task.wait(0.15) -- Увеличиваем задержку для гарантии
+					updateSizes()
+
+					-- Дублируем обновление через еще одну задержку
+					task.wait(0.1)
 					updateSizes()
 				end)
 
@@ -3286,7 +3296,7 @@ function library:CreateWindow(name, size, hidebutton)
 							dropdown.BlackOutline2Items.Visible = true
 							dropdown.IgnoreBackButtons.Visible = true
 							dropdown.IgnoreBackButtons.Active = true
-							updateSizes()
+							updateSizes() -- Обновляем размеры при открытии
 						end
 					else
 						tweenservice:Create(dropdown.Nav, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = 90}):Play()
