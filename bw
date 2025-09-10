@@ -3029,7 +3029,7 @@ function library:CreateWindow(name, size, hidebutton)
 					dropdown.BlackOutline.BackgroundColor3 = theme.outlinecolor2
 				end)
 
-				-- Items Frame (ScrollingFrame)
+				-- Items Frame (ScrollingFrame) - ФИКСИРОВАННЫЙ РАЗМЕР!
 				dropdown.ItemsFrame = Instance.new("ScrollingFrame", dropdown.Main)
 				dropdown.ItemsFrame.Name = "itemsframe"
 				dropdown.ItemsFrame.BorderSizePixel = 0
@@ -3039,6 +3039,7 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.ItemsFrame.ZIndex = 8
 				dropdown.ItemsFrame.ScrollingDirection = Enum.ScrollingDirection.Y
 				dropdown.ItemsFrame.Visible = false
+				dropdown.ItemsFrame.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset, 156) -- ФИКСИРОВАННАЯ ВЫСОТА
 				dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 
 				-- Layout
@@ -3046,17 +3047,11 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.ListLayout.FillDirection = Enum.FillDirection.Vertical
 				dropdown.ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-				-- Padding
-				dropdown.ListPadding = Instance.new("UIPadding", dropdown.ItemsFrame)
-				dropdown.ListPadding.PaddingTop = UDim.new(0, 2)
-				dropdown.ListPadding.PaddingBottom = UDim.new(0, 2)
-				dropdown.ListPadding.PaddingLeft = UDim.new(0, 2)
-				dropdown.ListPadding.PaddingRight = UDim.new(0, 2)
-
 				-- Items Outlines
 				dropdown.BlackOutline2Items = Instance.new("Frame", dropdown.Main)
 				dropdown.BlackOutline2Items.Name = "blackline"
 				dropdown.BlackOutline2Items.ZIndex = 7
+				dropdown.BlackOutline2Items.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(6, 6)
 				dropdown.BlackOutline2Items.BorderSizePixel = 0
 				dropdown.BlackOutline2Items.BackgroundColor3 = window.theme.outlinecolor2
 				dropdown.BlackOutline2Items.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(-3, -3)
@@ -3069,6 +3064,7 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.OutlineItems = Instance.new("Frame", dropdown.Main)
 				dropdown.OutlineItems.Name = "blackline"
 				dropdown.OutlineItems.ZIndex = 7
+				dropdown.OutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(4, 4)
 				dropdown.OutlineItems.BorderSizePixel = 0
 				dropdown.OutlineItems.BackgroundColor3 = window.theme.outlinecolor
 				dropdown.OutlineItems.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(-2, -2)
@@ -3081,6 +3077,7 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.BlackOutlineItems = Instance.new("Frame", dropdown.Main)
 				dropdown.BlackOutlineItems.Name = "blackline"
 				dropdown.BlackOutlineItems.ZIndex = 7
+				dropdown.BlackOutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(2, 2)
 				dropdown.BlackOutlineItems.BorderSizePixel = 0
 				dropdown.BlackOutlineItems.BackgroundColor3 = window.theme.outlinecolor2
 				dropdown.BlackOutlineItems.Position = dropdown.ItemsFrame.Position + UDim2.fromOffset(-1, -1)
@@ -3095,7 +3092,7 @@ function library:CreateWindow(name, size, hidebutton)
 				dropdown.IgnoreBackButtons.BackgroundTransparency = 1
 				dropdown.IgnoreBackButtons.BorderSizePixel = 0
 				dropdown.IgnoreBackButtons.Position = UDim2.fromOffset(0, dropdown.Main.Size.Y.Offset + 8)
-				dropdown.IgnoreBackButtons.Size = UDim2.new(0, 0, 0, 0)
+				dropdown.IgnoreBackButtons.Size = dropdown.ItemsFrame.Size
 				dropdown.IgnoreBackButtons.ZIndex = 7
 				dropdown.IgnoreBackButtons.Text = ""
 				dropdown.IgnoreBackButtons.Visible = false
@@ -3104,20 +3101,6 @@ function library:CreateWindow(name, size, hidebutton)
 				-- Flags
 				if dropdown.flag and dropdown.flag ~= "" then
 					library.flags[dropdown.flag] = dropdown.multichoice and {dropdown.default or dropdown.defaultitems[1] or ""} or (dropdown.default or dropdown.defaultitems[1] or "")
-				end
-
-				-- Функция для обновления размеров
-				local function updateSizes()
-					local contentHeight = dropdown.ListLayout.AbsoluteContentSize.Y + 4
-					local maxHeight = math.min(156, contentHeight)
-
-					dropdown.ItemsFrame.Size = UDim2.fromOffset(dropdown.Main.Size.X.Offset, maxHeight)
-					dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
-
-					dropdown.BlackOutline2Items.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(6, 6)
-					dropdown.OutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(4, 4)
-					dropdown.BlackOutlineItems.Size = dropdown.ItemsFrame.Size + UDim2.fromOffset(2, 2)
-					dropdown.IgnoreBackButtons.Size = dropdown.ItemsFrame.Size
 				end
 
 				-- Methods
@@ -3220,6 +3203,13 @@ function library:CreateWindow(name, size, hidebutton)
 					end)
 
 					table.insert(dropdown.items, v)
+
+					-- Автоматическое обновление CanvasSize
+					task.spawn(function()
+						task.wait(0.05)
+						dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
+					end)
+
 					return Item
 				end
 
@@ -3234,35 +3224,12 @@ function library:CreateWindow(name, size, hidebutton)
 						end
 						item:Destroy()
 
-						-- Принудительное обновление размеров после удаления
+						-- Обновляем CanvasSize после удаления
 						task.spawn(function()
 							task.wait(0.05)
-							updateSizes()
+							dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
 						end)
 					end
-				end
-
-				function dropdown:Refresh()
-					-- Очищаем текущие элементы
-					for i = #dropdown.items, 1, -1 do
-						dropdown:Remove(dropdown.items[i])
-					end
-
-					-- Добавляем новые элементы
-					for _, item in ipairs(dropdown.defaultitems) do
-						dropdown:Add(item)
-					end
-
-					-- Устанавливаем значение по умолчанию
-					if dropdown.default then
-						dropdown:Set(dropdown.default)
-					end
-
-					-- Принудительное обновление размеров
-					task.spawn(function()
-						task.wait(0.1)
-						updateSizes()
-					end)
 				end
 
 				-- Инициализация - ДОБАВЛЯЕМ ЭЛЕМЕНТЫ
@@ -3274,14 +3241,10 @@ function library:CreateWindow(name, size, hidebutton)
 					dropdown:Set(dropdown.default)
 				end
 
-				-- КРИТИЧЕСКИ ВАЖНО: ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ РАЗМЕРОВ ПОСЛЕ ДОБАВЛЕНИЯ ВСЕХ ЭЛЕМЕНТОВ
+				-- ОБНОВЛЯЕМ CANVAS SIZE ПОСЛЕ ДОБАВЛЕНИЯ ВСЕХ ЭЛЕМЕНТОВ
 				task.spawn(function()
-					task.wait(0.15) -- Увеличиваем задержку для гарантии
-					updateSizes()
-
-					-- Дублируем обновление через еще одну задержку
 					task.wait(0.1)
-					updateSizes()
+					dropdown.ItemsFrame.CanvasSize = UDim2.new(0, 0, 0, dropdown.ListLayout.AbsoluteContentSize.Y + 4)
 				end)
 
 				-- Обработчики кликов
@@ -3296,7 +3259,6 @@ function library:CreateWindow(name, size, hidebutton)
 							dropdown.BlackOutline2Items.Visible = true
 							dropdown.IgnoreBackButtons.Visible = true
 							dropdown.IgnoreBackButtons.Active = true
-							updateSizes() -- Обновляем размеры при открытии
 						end
 					else
 						tweenservice:Create(dropdown.Nav, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Rotation = 90}):Play()
